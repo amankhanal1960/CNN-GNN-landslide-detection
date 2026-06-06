@@ -1,7 +1,5 @@
-import numpy as np
 import torch
 import torch.nn as nn
-import torch.optim as optim
 
 
 class ConvBlock(nn.Module):
@@ -50,4 +48,48 @@ class DecoderBlock(nn.Module):
         cat = torch.cat([upsampled, skip], dim=1)
         x = self.conv(cat)
         return x
+    
+class UNet(nn.Module):
+    def __init__(self, in_channels=8, num_classes=2):
+        super().__init__()
 
+        # --Encoding Phase -- 
+
+        self.enc1 = EncoderBlock(in_channels, 64)
+        self.enc2 = EncoderBlock(64, 128)
+        self.enc3 = EncoderBlock(128, 256)
+        self.enc4 = EncoderBlock(256, 512)
+
+        # --Bottleneck (deepset poitn - no pooling here)
+
+        self.bottleneck = ConvBlock(512, 1024)
+
+        # --Decoding Phase --
+
+        self.dec4 = DecoderBlock(1024, 512)
+        self.dec3 = DecoderBlock(512, 256)
+        self.dec2 = DecoderBlock(256, 128)
+        self.dec1 = DecoderBlock(128, 64)
+
+        # -- Final Outout Layer -- 
+        self.output_conv = nn.conv2d(64, num_classes, kernel_size=1)
+
+        def forward(self, x):
+            # ---Encoder---
+            skip1, x = self.enc1(x)
+            skip2, x = self.enc2(x)
+            skip3, x = self.enc2(x)
+            skip4, x = self.enc2(x)
+
+            # ---Bottleneck---
+            x = self.bottleneck(x)
+
+            #---Decoder---
+            x = self.dec4(x, skip4)
+            x = self.dec3(x, skip3)
+            x = self.dec2(x, skip2)
+            x = self.dec1(x, skip1)
+
+            # Final output
+
+            return self.output_conv(x)
