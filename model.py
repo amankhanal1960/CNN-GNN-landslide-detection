@@ -10,8 +10,8 @@ class ConvBlock(nn.Module):
             nn.BatchNorm2d(out_channels),
             nn.ReLU(inplace=True),
             nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False),
-            nn.BatchNorm2d(out_channels)
-            nn.ReLU(implace=True)
+            nn.BatchNorm2d(out_channels),
+            nn.ReLU(inplace=True)
         )
 
     def forward(self, x):
@@ -60,7 +60,7 @@ class UNet(nn.Module):
         self.enc3 = EncoderBlock(128, 256)
         self.enc4 = EncoderBlock(256, 512)
 
-        # --Bottleneck (deepset poitn - no pooling here)
+        # --Bottleneck (deepest point - no pooling here)
 
         self.bottleneck = ConvBlock(512, 1024)
 
@@ -72,24 +72,24 @@ class UNet(nn.Module):
         self.dec1 = DecoderBlock(128, 64)
 
         # -- Final Outout Layer -- 
-        self.output_conv = nn.conv2d(64, num_classes, kernel_size=1)
+        self.output_conv = nn.Conv2d(64, num_classes, kernel_size=1)
 
-        def forward(self, x):
+    def forward(self, x):
             # ---Encoder---
-            skip1, x = self.enc1(x)
-            skip2, x = self.enc2(x)
-            skip3, x = self.enc2(x)
-            skip4, x = self.enc2(x)
+        skip1, x = self.enc1(x)
+        skip2, x = self.enc2(x)
+        skip3, x = self.enc3(x)
+        skip4, x = self.enc4(x)
 
-            # ---Bottleneck---
-            x = self.bottleneck(x)
+        # ---Bottleneck---
+        x = self.bottleneck(x)
 
-            #---Decoder---
-            x = self.dec4(x, skip4)
-            x = self.dec3(x, skip3)
-            x = self.dec2(x, skip2)
-            x = self.dec1(x, skip1)
+        #---Decoder---
+        x = self.dec4(x, skip4)
+        x = self.dec3(x, skip3)
+        x = self.dec2(x, skip2)
+        x = self.dec1(x, skip1)
 
-            # Final output
+        # Final output
 
-            return self.output_conv(x)
+        return self.output_conv(x)
