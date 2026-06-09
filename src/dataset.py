@@ -56,12 +56,10 @@ def train_transform():
             p=0.5
         ),
             
-        A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.1, p=0.3),
-            
         ToTensorV2()
     ])
     
-def val_transforms():
+def val_transform():
     return A.Compose([
         ToTensorV2()
     ])

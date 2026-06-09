@@ -1,11 +1,11 @@
-# --- TRAINING SCRIPT ----
+import os
 import torch
 from torch import optim
-import torch.nn as nn
-from torch.utils.data import DataLoader, random_split
-from src.dataset import LandslideDataset
+from torch.utils.data import DataLoader
+from numpy import random
+from src.dataset import LandslideDataset, train_transform, val_transform
 from src.model import UNet
-from utils import CombinedLoss, compute_metrics
+from src.utils import CombinedFocalDiceLoss, compute_metrics
 
 
 def train(img_dir, mask_dir, num_epochs, batch_size, lr, save_path):
@@ -13,13 +13,22 @@ def train(img_dir, mask_dir, num_epochs, batch_size, lr, save_path):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
 
-    full_dataset = LandslideDataset(img_dir=img_dir, mask_dir = mask_dir)
-    print(f"Total samples: {len(full_dataset)}")
+    # extracting and shuffling the file IDs
+    all_files = sorted([f for f in os.listdir(img_dir) if f.endswith(".h5")])
+    all_ids = [int(f.split("_")[1].split(".")[0]) for f in all_files]
     
-    train_size = int(0.85 * len(full_dataset))
-    val_size = len(full_dataset) - train_size
+    # Shuffle with a fixed seed so train and val stays consistent
+    random.seed(42)
+    random.shuffle(all_ids)
     
-    train_dataset, val_dataset = random_split(full_dataset, [train_size, val_size])
+    train_size = int(0.85 * len(all_ids))
+    train_ids = all_ids[:train_size]
+    val_ids = all_ids[train_size:]
+    
+    print(f"Total Samples: {len(all_ids)} | Train: {len(train_ids)} | Val: {len(val_ids)}")
+    
+    train_dataset = LandslideDataset(img_dir=img_dir, mask_dir=mask_dir, transform=train_transform(), file_ids=train_ids)
+    val_dataset = LandslideDataset(img_dir=img_dir, mask_dir=mask_dir, transform=val_transform(), file_ids=val_ids)
     
     train_loader = DataLoader(train_dataset, batch_size=batch_size,  shuffle=True, num_workers=2)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
@@ -27,7 +36,7 @@ def train(img_dir, mask_dir, num_epochs, batch_size, lr, save_path):
     
     # ----- Model, Loss and Optimizer ----- #
     model = UNet(in_channels=8, num_classes=2).to(device)
-    criterion = CombinedLoss(dice_weight=0.5, ce_weight=0.5)
+    criterion = CombinedFocalDiceLoss(focal_weight=0.5, dice_weight=0.5, alpha=0.75, gamma=2.0)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", patience=5, factor=0.5, verbose=True)

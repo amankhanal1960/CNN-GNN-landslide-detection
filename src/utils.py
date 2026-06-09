@@ -20,18 +20,41 @@ class DiceLoss(nn.Module):
 
         return 1 - dice.mean()
 
-
-class CombinedLoss(nn.Module):
-    def __init__(self, dice_weight=0.5, ce_weight=0.5):
+class BinaryFocalLoss(nn.Module):
+    def __init__(self, alpha=0.75, gamma=2.0, smooth=1e-6):
+        # alpha is weight for positive class
+        # gamma is focusing parameter, 2.0 is standard
         super().__init__()
-        self.dice_weight = dice_weight
-        self.ce_weight = ce_weight
-        self.dice = DiceLoss()
+        self.alpha = alpha
+        self.gamma = gamma
+        self.smooth = smooth
+        
+    def forward(self, logits, targets):
+        probs = torch.softmax(logits, dim=1)[:,1]
+        targets_f = targets.float()
+        
+        # p_t = probability of the true class
+        pt = torch.where(targets_f == 1, probs, 1 - probs)
+        
+        #alpha_t = class-dependent balancing factor
+        alpha_t = torch.where(targets_f == 1, self.alpha, 1 - self.alpha)
+        
+        # Focal Loss per pixel
+        focal = -alpha_t * (1 - pt) ** self.gamma * torch.log(pt + self.smooth)
+        
+        return focal.mean()
+        
 
-        self.ce = nn.CrossEntropyLoss()
+class CombinedFocalDiceLoss(nn.Module):
+    def __init__(self, focal_weight=0.5, dice_weight=0.5, alpha=0.75, gamma=2.0):
+        super().__init__()
+        self.focal = BinaryFocalLoss(alpha=alpha, gamma=gamma)
+        self.dice = DiceLoss()
+        self.focal_weight = focal_weight
+        self.dice_weight = dice_weight
 
     def forward(self, predictions, targets):
-        combined = self.ce_weight * self.ce(
+        combined = self.focal_weight * self.focal(
             predictions, targets
         ) + self.dice_weight * self.dice(predictions, targets)
 
