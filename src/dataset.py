@@ -3,7 +3,8 @@ import h5py
 import torch
 from torch.utils.data import Dataset
 import numpy as np
-
+import albumentations as A
+from albumentations.pytorch import ToTensorV2   
 
 def compute_topographical_features(
     dem, slope_deg, res=10.0, azimuth=315, angle_altitude=45
@@ -39,19 +40,48 @@ def compute_topographical_features(
     return northness, curvature, hillshade
 
 
+
+def train_transform():
+    return A.Compose([
+        A.HorizontalFlip(p=0.5),
+        A.VerticalFlip(p=0.5),
+            
+        A.RandomRotate90(p=0.5),
+            
+        A.ShiftScaleRotate(
+            shift_limit=0.1,
+            scale_limit=0.1,
+            rotate_limit=45,
+            border_mode=0,
+            p=0.5
+        ),
+            
+        A.RandomBrightnessContrast(brightness_limit=0.1, contrast_limit=0.1, p=0.3),
+            
+        ToTensorV2()
+    ])
+    
+def val_transforms():
+    return A.Compose([
+        ToTensorV2()
+    ])
+
 class LandslideDataset(Dataset):
-    def __init__(self, img_dir, mask_dir=None, transform=None):
+    def __init__(self, img_dir, mask_dir=None, transform=None, file_ids=None):
         self.img_dir = img_dir
         self.mask_dir = mask_dir
         self.transform = transform
 
-        self.file_ids = sorted(
-            [
-                int(f.split("_")[1].split(".")[0])
-                for f in os.listdir(img_dir)
-                if f.endswith(".h5")
-            ]
-        )
+        if file_ids is not None:
+            self.file_ids = file_ids
+        else:
+            self.file_ids = sorted(
+                [
+                    int(f.split("_")[1].split(".")[0])
+                    for f in os.listdir(img_dir)
+                    if f.endswith(".h5")
+                ]
+            )
 
     def __len__(self):
         return len(self.file_ids)
@@ -92,12 +122,16 @@ class LandslideDataset(Dataset):
             [dem, slope, northness, curvature, hillshade, ndvi, bsi, ndwi], axis=-1
         )  # final 8 channel raster
 
-        image_8ch = image_8ch.transpose((2, 0, 1))  # (C, H, W)
-
-        image = torch.from_numpy(image_8ch).float()
-        mask = torch.from_numpy(mask).long()
-
         if self.transform:
-            image, mask = self.transform(image, mask)
+            
+            augmented = self.transform(image=image_8ch, mask=mask)
+            image = augmented['image'].float()
+            mask = augmented['mask'].long()
+        else:
+            image_8ch = image_8ch.transpose((2, 0, 1))  # (C, H, W)
+
+            image = torch.from_numpy(image_8ch).float()
+            mask = torch.from_numpy(mask).long()
+            
 
         return image, mask

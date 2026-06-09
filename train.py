@@ -3,8 +3,8 @@ import torch
 from torch import optim
 import torch.nn as nn
 from torch.utils.data import DataLoader, random_split
-from dataset import LandslideDataset
-from model import UNet
+from src.dataset import LandslideDataset
+from src.model import UNet
 from utils import CombinedLoss, compute_metrics
 
 

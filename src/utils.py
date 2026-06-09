@@ -45,7 +45,7 @@ def compute_metrics(predictions, targets, threshold=0.5):
     pred = pred_labels.view(-1).cpu()
     true = targets.view(-1).cpu()
 
-    tp = ((True == 1) & (pred == 1)).sum().float()
+    tp = ((true == 1) & (pred == 1)).sum().float()
     fp = ((true == 0) & (pred == 1)).sum().float()
     fn = ((true == 1) & (pred == 0)).sum().float()
 
