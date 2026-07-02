@@ -4,7 +4,7 @@ from torch import optim
 from torch.utils.data import DataLoader
 from numpy import random
 from src.dataset import LandslideDataset, train_transform, val_transform
-from src.model import UNet
+from src.UNet_only import UNet
 from src.utils import CombinedFocalDiceLoss, compute_metrics
 
 
