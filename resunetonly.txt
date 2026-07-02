@@ -1,54 +1,66 @@
---- Starting Cloud Landslide Mapping Pipeline ---
-Using device: cuda
-Total Samples: 3799 | Train: 3229 | Val: 570
-Epoch [01/50] | Train Loss: 0.4250 | Val Loss: 0.3842  IoU: 0.3616  F1: 0.5234  Precision: 0.3898  Recall: 0.8421
-Epoch [02/50] | Train Loss: 0.3790 | Val Loss: 0.3500  IoU: 0.4470  F1: 0.6114  Precision: 0.4986  Recall: 0.8102
-Epoch [03/50] | Train Loss: 0.3534 | Val Loss: 0.3197  IoU: 0.4858  F1: 0.6485  Precision: 0.5841  Recall: 0.7415
-Epoch [04/50] | Train Loss: 0.2939 | Val Loss: 0.2369  IoU: 0.4416  F1: 0.6022  Precision: 0.5103  Recall: 0.7635
-Epoch [05/50] | Train Loss: 0.2274 | Val Loss: 0.2018  IoU: 0.4703  F1: 0.6353  Precision: 0.7144  Recall: 0.5791
-Epoch [06/50] | Train Loss: 0.2072 | Val Loss: 0.1859  IoU: 0.4809  F1: 0.6437  Precision: 0.5889  Recall: 0.7312
-Epoch [07/50] | Train Loss: 0.2066 | Val Loss: 0.1873  IoU: 0.4866  F1: 0.6488  Precision: 0.6893  Recall: 0.6219
-Epoch [08/50] | Train Loss: 0.1964 | Val Loss: 0.1881  IoU: 0.4787  F1: 0.6400  Precision: 0.6162  Recall: 0.6808
-Epoch [09/50] | Train Loss: 0.2058 | Val Loss: 0.2122  IoU: 0.4619  F1: 0.6227  Precision: 0.6068  Recall: 0.6619
-Epoch [10/50] | Train Loss: 0.2124 | Val Loss: 0.1909  IoU: 0.4879  F1: 0.6479  Precision: 0.6066  Recall: 0.7133
-Epoch [11/50] | Train Loss: 0.1994 | Val Loss: 0.1805  IoU: 0.4930  F1: 0.6538  Precision: 0.6014  Recall: 0.7302
-Epoch [12/50] | Train Loss: 0.1995 | Val Loss: 0.1846  IoU: 0.4764  F1: 0.6386  Precision: 0.5473  Recall: 0.7872
-Epoch [13/50] | Train Loss: 0.1903 | Val Loss: 0.1971  IoU: 0.5202  F1: 0.6787  Precision: 0.6576  Recall: 0.7097
-Epoch [14/50] | Train Loss: 0.1913 | Val Loss: 0.1824  IoU: 0.5057  F1: 0.6670  Precision: 0.6698  Recall: 0.6745
-Epoch [15/50] | Train Loss: 0.1916 | Val Loss: 0.1784  IoU: 0.5303  F1: 0.6878  Precision: 0.6988  Recall: 0.6853
-Epoch [16/50] | Train Loss: 0.1928 | Val Loss: 0.1901  IoU: 0.4967  F1: 0.6581  Precision: 0.5770  Recall: 0.7809
-Epoch [17/50] | Train Loss: 0.1887 | Val Loss: 0.1756  IoU: 0.5224  F1: 0.6799  Precision: 0.6550  Recall: 0.7147
-Epoch [18/50] | Train Loss: 0.1939 | Val Loss: 0.1752  IoU: 0.5119  F1: 0.6704  Precision: 0.6073  Recall: 0.7604
-Epoch [19/50] | Train Loss: 0.1808 | Val Loss: 0.1820  IoU: 0.5092  F1: 0.6674  Precision: 0.7043  Recall: 0.6428
-Epoch [20/50] | Train Loss: 0.1810 | Val Loss: 0.1839  IoU: 0.5155  F1: 0.6753  Precision: 0.6671  Recall: 0.6915
-Epoch [21/50] | Train Loss: 0.1824 | Val Loss: 0.1702  IoU: 0.5133  F1: 0.6718  Precision: 0.5965  Recall: 0.7804
-Epoch [22/50] | Train Loss: 0.1793 | Val Loss: 0.1630  IoU: 0.5288  F1: 0.6861  Precision: 0.6641  Recall: 0.7179
-Epoch [23/50] | Train Loss: 0.1792 | Val Loss: 0.1659  IoU: 0.5283  F1: 0.6853  Precision: 0.6405  Recall: 0.7475
-Epoch [24/50] | Train Loss: 0.1863 | Val Loss: 0.1654  IoU: 0.5249  F1: 0.6831  Precision: 0.6360  Recall: 0.7467
-Epoch [25/50] | Train Loss: 0.1763 | Val Loss: 0.1645  IoU: 0.5397  F1: 0.6957  Precision: 0.6995  Recall: 0.6994
-Epoch [26/50] | Train Loss: 0.1820 | Val Loss: 0.1654  IoU: 0.5341  F1: 0.6906  Precision: 0.6605  Recall: 0.7318
-Epoch [27/50] | Train Loss: 0.1828 | Val Loss: 0.1713  IoU: 0.5265  F1: 0.6836  Precision: 0.6518  Recall: 0.7271
-Epoch [28/50] | Train Loss: 0.1828 | Val Loss: 0.1705  IoU: 0.5354  F1: 0.6908  Precision: 0.6758  Recall: 0.7152
-Epoch [29/50] | Train Loss: 0.1728 | Val Loss: 0.1772  IoU: 0.5220  F1: 0.6799  Precision: 0.7128  Recall: 0.6603
-Epoch [30/50] | Train Loss: 0.1725 | Val Loss: 0.1601  IoU: 0.5382  F1: 0.6936  Precision: 0.6466  Recall: 0.7571
-Epoch [31/50] | Train Loss: 0.1729 | Val Loss: 0.1691  IoU: 0.5349  F1: 0.6900  Precision: 0.7078  Recall: 0.6806
-Epoch [32/50] | Train Loss: 0.1745 | Val Loss: 0.1685  IoU: 0.5420  F1: 0.6965  Precision: 0.6805  Recall: 0.7213
-Epoch [33/50] | Train Loss: 0.1688 | Val Loss: 0.1614  IoU: 0.5451  F1: 0.6991  Precision: 0.6517  Recall: 0.7611
-Epoch [34/50] | Train Loss: 0.1711 | Val Loss: 0.1728  IoU: 0.4959  F1: 0.6521  Precision: 0.6060  Recall: 0.7331
-Epoch [35/50] | Train Loss: 0.1767 | Val Loss: 0.1685  IoU: 0.5440  F1: 0.6987  Precision: 0.7099  Recall: 0.6941
-Epoch [36/50] | Train Loss: 0.1735 | Val Loss: 0.1672  IoU: 0.5498  F1: 0.7032  Precision: 0.7034  Recall: 0.7104
-Epoch [37/50] | Train Loss: 0.1701 | Val Loss: 0.1605  IoU: 0.5527  F1: 0.7056  Precision: 0.6983  Recall: 0.7198
-Epoch [38/50] | Train Loss: 0.1693 | Val Loss: 0.1620  IoU: 0.5532  F1: 0.7060  Precision: 0.6897  Recall: 0.7306
-Epoch [39/50] | Train Loss: 0.1670 | Val Loss: 0.1645  IoU: 0.5493  F1: 0.7025  Precision: 0.6879  Recall: 0.7247
-Epoch [40/50] | Train Loss: 0.1689 | Val Loss: 0.1595  IoU: 0.5482  F1: 0.7028  Precision: 0.6436  Recall: 0.7818
-Epoch [41/50] | Train Loss: 0.1653 | Val Loss: 0.1614  IoU: 0.5511  F1: 0.7037  Precision: 0.6696  Recall: 0.7504
-Epoch [42/50] | Train Loss: 0.1683 | Val Loss: 0.1581  IoU: 0.5538  F1: 0.7071  Precision: 0.6888  Recall: 0.7331
-Epoch [43/50] | Train Loss: 0.1650 | Val Loss: 0.1691  IoU: 0.5420  F1: 0.6965  Precision: 0.7267  Recall: 0.6776
-Epoch [44/50] | Train Loss: 0.1686 | Val Loss: 0.1577  IoU: 0.5430  F1: 0.6973  Precision: 0.6560  Recall: 0.7519
-Epoch [45/50] | Train Loss: 0.1646 | Val Loss: 0.1578  IoU: 0.5534  F1: 0.7067  Precision: 0.6842  Recall: 0.7391
-Epoch [46/50] | Train Loss: 0.1602 | Val Loss: 0.1618  IoU: 0.5448  F1: 0.6982  Precision: 0.6770  Recall: 0.7290
-Epoch [47/50] | Train Loss: 0.1612 | Val Loss: 0.1554  IoU: 0.5521  F1: 0.7059  Precision: 0.7180  Recall: 0.7019
-Epoch [48/50] | Train Loss: 0.1672 | Val Loss: 0.1553  IoU: 0.5589  F1: 0.7119  Precision: 0.6912  Recall: 0.7412
-Epoch [49/50] | Train Loss: 0.1668 | Val Loss: 0.1558  IoU: 0.5551  F1: 0.7092  Precision: 0.6573  Recall: 0.7768
-Epoch [50/50] | Train Loss: 0.1653 | Val Loss: 0.1575  IoU: 0.5512  F1: 0.7051  Precision: 0.6859  Recall: 0.7334
+Epoch [01/65] | Train Loss: 0.5113 | Val Loss: 0.4474  IoU: 0.3758  F1: 0.5377  Precision: 0.4079  Recall: 0.8285| LR: 0.000100
+Epoch [02/65] | Train Loss: 0.4546 | Val Loss: 0.4164  IoU: 0.4282  F1: 0.5916  Precision: 0.4638  Recall: 0.8462| LR: 0.000100
+Epoch [03/65] | Train Loss: 0.4209 | Val Loss: 0.3759  IoU: 0.2853  F1: 0.4294  Precision: 0.3178  Recall: 0.7461| LR: 0.000100
+Epoch [04/65] | Train Loss: 0.3686 | Val Loss: 0.3062  IoU: 0.3097  F1: 0.4608  Precision: 0.3319  Recall: 0.8331| LR: 0.000100
+Epoch [05/65] | Train Loss: 0.3047 | Val Loss: 0.2463  IoU: 0.4818  F1: 0.6421  Precision: 0.5605  Recall: 0.7721| LR: 0.000100
+Epoch [06/65] | Train Loss: 0.2419 | Val Loss: 0.2318  IoU: 0.5044  F1: 0.6651  Precision: 0.6114  Recall: 0.7425| LR: 0.000100
+Epoch [07/65] | Train Loss: 0.2420 | Val Loss: 0.2282  IoU: 0.4719  F1: 0.6305  Precision: 0.5593  Recall: 0.7465| LR: 0.000100
+Epoch [08/65] | Train Loss: 0.2339 | Val Loss: 0.2450  IoU: 0.4445  F1: 0.6061  Precision: 0.5718  Recall: 0.6704| LR: 0.000100
+Epoch [09/65] | Train Loss: 0.2341 | Val Loss: 0.2487  IoU: 0.4576  F1: 0.6197  Precision: 0.6189  Recall: 0.6398| LR: 0.000100
+Epoch [10/65] | Train Loss: 0.2300 | Val Loss: 0.2117  IoU: 0.4978  F1: 0.6591  Precision: 0.7012  Recall: 0.6301| LR: 0.000100
+Epoch [11/65] | Train Loss: 0.2281 | Val Loss: 0.2241  IoU: 0.4582  F1: 0.6207  Precision: 0.5026  Recall: 0.8379| LR: 0.000100
+Epoch [12/65] | Train Loss: 0.2170 | Val Loss: 0.2172  IoU: 0.4992  F1: 0.6585  Precision: 0.6074  Recall: 0.7344| LR: 0.000100
+Epoch [13/65] | Train Loss: 0.2206 | Val Loss: 0.2007  IoU: 0.5216  F1: 0.6792  Precision: 0.6352  Recall: 0.7391| LR: 0.000100
+Epoch [14/65] | Train Loss: 0.2164 | Val Loss: 0.2075  IoU: 0.4906  F1: 0.6491  Precision: 0.5989  Recall: 0.7283| LR: 0.000100
+Epoch [15/65] | Train Loss: 0.2269 | Val Loss: 0.2176  IoU: 0.4959  F1: 0.6534  Precision: 0.6391  Recall: 0.6871| LR: 0.000100
+Epoch [16/65] | Train Loss: 0.2230 | Val Loss: 0.2052  IoU: 0.5137  F1: 0.6715  Precision: 0.6351  Recall: 0.7251| LR: 0.000100
+Epoch [17/65] | Train Loss: 0.2451 | Val Loss: 0.2389  IoU: 0.4724  F1: 0.6335  Precision: 0.6671  Recall: 0.6183| LR: 0.000100
+Epoch [18/65] | Train Loss: 0.2525 | Val Loss: 0.2249  IoU: 0.4997  F1: 0.6592  Precision: 0.6418  Recall: 0.6928| LR: 0.000100
+Epoch [19/65] | Train Loss: 0.2325 | Val Loss: 0.2183  IoU: 0.4979  F1: 0.6565  Precision: 0.6329  Recall: 0.6975| LR: 0.000050
+Epoch [20/65] | Train Loss: 0.2267 | Val Loss: 0.2137  IoU: 0.5000  F1: 0.6588  Precision: 0.5725  Recall: 0.7952| LR: 0.000050
+Epoch [21/65] | Train Loss: 0.2248 | Val Loss: 0.2049  IoU: 0.5177  F1: 0.6754  Precision: 0.6348  Recall: 0.7356| LR: 0.000050
+Epoch [22/65] | Train Loss: 0.2200 | Val Loss: 0.2019  IoU: 0.5207  F1: 0.6787  Precision: 0.6442  Recall: 0.7286| LR: 0.000050
+Epoch [23/65] | Train Loss: 0.2131 | Val Loss: 0.2077  IoU: 0.5030  F1: 0.6617  Precision: 0.5769  Recall: 0.7944| LR: 0.000050
+Epoch [24/65] | Train Loss: 0.2137 | Val Loss: 0.1992  IoU: 0.5224  F1: 0.6789  Precision: 0.6310  Recall: 0.7499| LR: 0.000050
+Epoch [25/65] | Train Loss: 0.2130 | Val Loss: 0.2074  IoU: 0.5085  F1: 0.6657  Precision: 0.6404  Recall: 0.7090| LR: 0.000050
+Epoch [26/65] | Train Loss: 0.2121 | Val Loss: 0.2023  IoU: 0.5174  F1: 0.6740  Precision: 0.6374  Recall: 0.7314| LR: 0.000050
+Epoch [27/65] | Train Loss: 0.2098 | Val Loss: 0.2039  IoU: 0.5252  F1: 0.6826  Precision: 0.6782  Recall: 0.6988| LR: 0.000050
+Epoch [28/65] | Train Loss: 0.2165 | Val Loss: 0.1983  IoU: 0.5294  F1: 0.6859  Precision: 0.6698  Recall: 0.7149| LR: 0.000050
+Epoch [29/65] | Train Loss: 0.2096 | Val Loss: 0.1941  IoU: 0.5260  F1: 0.6823  Precision: 0.6461  Recall: 0.7381| LR: 0.000050
+Epoch [30/65] | Train Loss: 0.2091 | Val Loss: 0.2023  IoU: 0.5263  F1: 0.6827  Precision: 0.6458  Recall: 0.7378| LR: 0.000050
+Epoch [31/65] | Train Loss: 0.2086 | Val Loss: 0.1921  IoU: 0.5276  F1: 0.6849  Precision: 0.6514  Recall: 0.7328| LR: 0.000050
+Epoch [32/65] | Train Loss: 0.2101 | Val Loss: 0.1932  IoU: 0.5291  F1: 0.6860  Precision: 0.6480  Recall: 0.7404| LR: 0.000050
+Epoch [33/65] | Train Loss: 0.2047 | Val Loss: 0.1976  IoU: 0.5330  F1: 0.6893  Precision: 0.6724  Recall: 0.7166| LR: 0.000050
+Epoch [34/65] | Train Loss: 0.2126 | Val Loss: 0.2008  IoU: 0.5270  F1: 0.6834  Precision: 0.6757  Recall: 0.7037| LR: 0.000050
+Epoch [35/65] | Train Loss: 0.2047 | Val Loss: 0.2004  IoU: 0.5341  F1: 0.6893  Precision: 0.6724  Recall: 0.7164| LR: 0.000050
+Epoch [36/65] | Train Loss: 0.2073 | Val Loss: 0.2044  IoU: 0.5241  F1: 0.6809  Precision: 0.6417  Recall: 0.7393| LR: 0.000050
+Epoch [37/65] | Train Loss: 0.2074 | Val Loss: 0.1975  IoU: 0.5305  F1: 0.6865  Precision: 0.6722  Recall: 0.7107| LR: 0.000025
+Epoch [38/65] | Train Loss: 0.2027 | Val Loss: 0.1933  IoU: 0.5372  F1: 0.6924  Precision: 0.6784  Recall: 0.7178| LR: 0.000025
+Epoch [39/65] | Train Loss: 0.2006 | Val Loss: 0.1998  IoU: 0.5396  F1: 0.6944  Precision: 0.6818  Recall: 0.7184| LR: 0.000025
+Epoch [40/65] | Train Loss: 0.1966 | Val Loss: 0.1894  IoU: 0.5395  F1: 0.6951  Precision: 0.6545  Recall: 0.7506| LR: 0.000025
+Epoch [41/65] | Train Loss: 0.1979 | Val Loss: 0.1913  IoU: 0.5426  F1: 0.6974  Precision: 0.6983  Recall: 0.7076| LR: 0.000025
+Epoch [42/65] | Train Loss: 0.1996 | Val Loss: 0.1918  IoU: 0.5467  F1: 0.7008  Precision: 0.6773  Recall: 0.7362| LR: 0.000025
+Epoch [43/65] | Train Loss: 0.1976 | Val Loss: 0.1893  IoU: 0.5472  F1: 0.7006  Precision: 0.6845  Recall: 0.7256| LR: 0.000025
+Epoch [44/65] | Train Loss: 0.2004 | Val Loss: 0.1952  IoU: 0.5335  F1: 0.6879  Precision: 0.6497  Recall: 0.7455| LR: 0.000025
+Epoch [45/65] | Train Loss: 0.1967 | Val Loss: 0.1909  IoU: 0.5405  F1: 0.6950  Precision: 0.6672  Recall: 0.7359| LR: 0.000025
+Epoch [46/65] | Train Loss: 0.1962 | Val Loss: 0.1951  IoU: 0.5439  F1: 0.6975  Precision: 0.6859  Recall: 0.7188| LR: 0.000025
+Epoch [47/65] | Train Loss: 0.1948 | Val Loss: 0.1844  IoU: 0.5568  F1: 0.7101  Precision: 0.6795  Recall: 0.7514| LR: 0.000025
+Epoch [48/65] | Train Loss: 0.1900 | Val Loss: 0.1968  IoU: 0.5444  F1: 0.6986  Precision: 0.6803  Recall: 0.7288| LR: 0.000025
+Epoch [49/65] | Train Loss: 0.1948 | Val Loss: 0.1909  IoU: 0.5491  F1: 0.7025  Precision: 0.7181  Recall: 0.6959| LR: 0.000025
+Epoch [50/65] | Train Loss: 0.1963 | Val Loss: 0.1913  IoU: 0.5403  F1: 0.6943  Precision: 0.6793  Recall: 0.7201| LR: 0.000025
+Epoch [51/65] | Train Loss: 0.1947 | Val Loss: 0.1860  IoU: 0.5457  F1: 0.6983  Precision: 0.6701  Recall: 0.7385| LR: 0.000025
+Epoch [52/65] | Train Loss: 0.1960 | Val Loss: 0.1864  IoU: 0.5462  F1: 0.6998  Precision: 0.6822  Recall: 0.7280| LR: 0.000025
+Epoch [53/65] | Train Loss: 0.1968 | Val Loss: 0.1934  IoU: 0.5474  F1: 0.6997  Precision: 0.6977  Recall: 0.7107| LR: 0.000013
+Epoch [54/65] | Train Loss: 0.1940 | Val Loss: 0.1951  IoU: 0.5456  F1: 0.6986  Precision: 0.6925  Recall: 0.7146| LR: 0.000013
+Epoch [55/65] | Train Loss: 0.1934 | Val Loss: 0.1890  IoU: 0.5450  F1: 0.6978  Precision: 0.6493  Recall: 0.7638| LR: 0.000013
+Epoch [56/65] | Train Loss: 0.1918 | Val Loss: 0.1904  IoU: 0.5535  F1: 0.7058  Precision: 0.6932  Recall: 0.7271| LR: 0.000013
+Epoch [57/65] | Train Loss: 0.1926 | Val Loss: 0.1895  IoU: 0.5520  F1: 0.7044  Precision: 0.6913  Recall: 0.7263| LR: 0.000013
+Epoch [58/65] | Train Loss: 0.1904 | Val Loss: 0.1901  IoU: 0.5511  F1: 0.7031  Precision: 0.6835  Recall: 0.7330| LR: 0.000013
+Epoch [59/65] | Train Loss: 0.1884 | Val Loss: 0.1883  IoU: 0.5545  F1: 0.7072  Precision: 0.6836  Recall: 0.7407| LR: 0.000006
+Epoch [60/65] | Train Loss: 0.1919 | Val Loss: 0.1926  IoU: 0.5525  F1: 0.7047  Precision: 0.6967  Recall: 0.7212| LR: 0.000006
+Epoch [61/65] | Train Loss: 0.1902 | Val Loss: 0.1897  IoU: 0.5565  F1: 0.7086  Precision: 0.6791  Recall: 0.7490| LR: 0.000006
+Epoch [62/65] | Train Loss: 0.1887 | Val Loss: 0.1882  IoU: 0.5558  F1: 0.7074  Precision: 0.6806  Recall: 0.7452| LR: 0.000006
+Epoch [63/65] | Train Loss: 0.1903 | Val Loss: 0.1884  IoU: 0.5521  F1: 0.7035  Precision: 0.6778  Recall: 0.7401| LR: 0.000006
+Epoch [64/65] | Train Loss: 0.1897 | Val Loss: 0.1927  IoU: 0.5505  F1: 0.7025  Precision: 0.6935  Recall: 0.7202| LR: 0.000006
+Epoch [65/65] | Train Loss: 0.1859 | Val Loss: 0.1858  IoU: 0.5585  F1: 0.7105  Precision: 0.6914  Recall: 0.7386| LR: 0.000003
 Training Complete! Model Saved.
