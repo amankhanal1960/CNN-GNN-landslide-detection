@@ -63,6 +63,8 @@ def compute_normalization(img_dir, file_ids):
         slope = raw_image[:, :, 12].astype(np.float32)
         dem = raw_image[:, :, 13].astype(np.float32)
         
+        northness, curvature, hillshade = compute_topographical_features(dem, slope)
+        
         ndvi = (nir - red) / (nir + red + eps)
         bsi = ((swir1 + red) - (nir + blue)) / ((swir1 + red) + (nir + blue) + eps)
         ndwi = (green - nir) / (green + nir + eps)
