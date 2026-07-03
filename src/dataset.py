@@ -39,7 +39,51 @@ def compute_topographical_features(
 
     return northness, curvature, hillshade
 
+def compute_normalization(img_dir, file_ids): 
+    """ Compute the mean and the standard deviation from the training set only. Protected against NaN vlaues. """
+    
+    channel_sum = np.zeros(8, dtype=np.float64)
+    channel_squared_sum = np.zeros(8, dtype=np.float64)
+    pixel_count = 0
+    eps = 1e-6
+    
+    for file_id in file_ids:
+        img_path = os.path.join(img_dir, f"image_{file_id}.h5")
+        if not os.path.exists(img_path):
+            continue  # Skip if the file does not exist
 
+        with h5py.File(img_path, "r") as f:
+            raw_image = f["img"][:]
+            
+        blue = raw_image[:, :, 1].astype(np.float32)
+        green = raw_image[:, :, 2].astype(np.float32)
+        red = raw_image[:, :, 3].astype(np.float32)
+        nir = raw_image[:, :, 7].astype(np.float32)
+        swir1 = raw_image[:, :, 10].astype(np.float32)
+        slope = raw_image[:, :, 12].astype(np.float32)
+        dem = raw_image[:, :, 13].astype(np.float32)
+        
+        ndvi = (nir - red) / (nir + red + eps)
+        bsi = ((swir1 + red) - (nir + blue)) / ((swir1 + red) + (nir + blue) + eps)
+        ndwi = (green - nir) / (green + nir + eps)
+        
+        image_8ch = np.stack(
+            [dem, slope, northness, curvature, hillshade, ndvi, bsi, ndwi], axis=-1
+        )  # final 8 channel raster
+        
+        image_8ch = np.nan_to_num(image_8ch, nan=0.0)  # Replace NaN values with 0.0
+        
+        h, w, c = image_8ch.shape
+        
+        channel_sum += np.sum(image_8ch, axis=(0, 1))
+        channel_squared_sum += np.sum(image_8ch ** 2, axis=(0, 1))
+        pixel_count += h * w
+
+    mean = channel_sum / pixel_count
+    std = np.sqrt((channel_squared_sum / pixel_count) - (mean ** 2))
+    
+
+    return mean.astype(np.float32), std.astype(np.float32)
 
 def train_transform():
     return A.Compose([
