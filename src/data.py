@@ -6,9 +6,8 @@ import numpy as np
 import albumentations as A
 from albumentations.pytorch import ToTensorV2   
 
-def compute_topographical_features(
-    dem, slope_deg, res=10.0, azimuth=315, angle_altitude=45
-):
+def compute_topographical_features(dem, slope_deg, res=10.0, azimuth=315, angle_altitude=45):
+    """ Compute northness, eastness, profile curvature"""
 
     dem_padded = np.pad(dem, pad_width=1, mode="edge")
 
@@ -25,25 +24,17 @@ def compute_topographical_features(
 
     aspect = np.arctan2(-dy, dx)
     northness = np.cos(aspect)
+    eastness = np.sin(aspect)
 
     curvature = d2x + d2y
 
-    slope_rad = np.radians(slope_deg)
-    azimuth_rad = np.radians(azimuth)
-    altitude_rad = np.radians(angle_altitude)
-
-    hillshade = np.sin(altitude_rad) * np.sin(slope_rad) + np.cos(
-        altitude_rad
-    ) * np.cos(azimuth_rad - aspect)
-    hillshade = np.clip(hillshade, 0, 1)
-
-    return northness, curvature, hillshade
+    return northness, eastness, curvature
 
 def compute_normalization(img_dir, file_ids): 
     """ Compute the mean and the standard deviation from the training set only. Protected against NaN vlaues. """
-    
-    channel_sum = np.zeros(8, dtype=np.float64)
-    channel_squared_sum = np.zeros(8, dtype=np.float64)
+    N_CHANNELS = 18
+    channel_sum = np.zeros(N_CHANNELS, dtype=np.float64)
+    channel_squared_sum = np.zeros(N_CHANNELS, dtype=np.float64)
     pixel_count = 0
     eps = 1e-6
     
@@ -55,30 +46,35 @@ def compute_normalization(img_dir, file_ids):
         with h5py.File(img_path, "r") as f:
             raw_image = f["img"][:]
             
-        blue = raw_image[:, :, 1].astype(np.float32)
+        blue  = raw_image[:, :, 1].astype(np.float32)
         green = raw_image[:, :, 2].astype(np.float32)
-        red = raw_image[:, :, 3].astype(np.float32)
-        nir = raw_image[:, :, 7].astype(np.float32)
+        red   = raw_image[:, :, 3].astype(np.float32)
+        b5    = raw_image[:, :, 4].astype(np.float32)
+        b6    = raw_image[:, :, 5].astype(np.float32)
+        b7    = raw_image[:, :, 6].astype(np.float32)
+        nir   = raw_image[:, :, 7].astype(np.float32)
+        b8a   = raw_image[:, :, 8].astype(np.float32)
         swir1 = raw_image[:, :, 10].astype(np.float32)
+        swir2 = raw_image[:, :, 11].astype(np.float32)
         slope = raw_image[:, :, 12].astype(np.float32)
-        dem = raw_image[:, :, 13].astype(np.float32)
+        dem   = raw_image[:, :, 13].astype(np.float32)
         
-        northness, curvature, hillshade = compute_topographical_features(dem, slope)
+        northness, eastness, curvature = compute_topographical_features(dem, slope)
         
         ndvi = (nir - red) / (nir + red + eps)
         bsi = ((swir1 + red) - (nir + blue)) / ((swir1 + red) + (nir + blue) + eps)
         ndwi = (green - nir) / (green + nir + eps)
         
-        image_8ch = np.stack(
-            [dem, slope, northness, curvature, hillshade, ndvi, bsi, ndwi], axis=-1
-        )  # final 8 channel raster
+        image_18ch = np.stack(
+            [dem, slope, northness, eastness, curvature, blue, green, red, nir, b5, b6, b7, b8a, swir1, swir2, ndvi, bsi, ndwi], axis=-1
+        )  # final 18 channel raster
         
-        image_8ch = np.nan_to_num(image_8ch, nan=0.0)  # Replace NaN values with 0.0
+        image_18ch = np.nan_to_num(image_18ch, nan=0.0)  # Replace NaN values with 0.0
         
-        h, w, c = image_8ch.shape
+        h, w, _ = image_18ch.shape
         
-        channel_sum += np.sum(image_8ch, axis=(0, 1))
-        channel_squared_sum += np.sum(image_8ch ** 2, axis=(0, 1))
+        channel_sum += np.sum(image_18ch, axis=(0, 1))
+        channel_squared_sum += np.sum(image_18ch ** 2, axis=(0, 1))
         pixel_count += h * w
 
     mean = channel_sum / pixel_count
@@ -111,10 +107,12 @@ def val_transform():
     ])
 
 class LandslideDataset(Dataset):
-    def __init__(self, img_dir, mask_dir=None, transform=None, file_ids=None):
+    def __init__(self, img_dir, mask_dir=None, transform=None, file_ids=None, mean=None, std=None):
         self.img_dir = img_dir
         self.mask_dir = mask_dir
         self.transform = transform
+        self.mean = mean
+        self.std = std
 
         if file_ids is not None:
             self.file_ids = file_ids
@@ -149,12 +147,19 @@ class LandslideDataset(Dataset):
         blue = raw_image[:, :, 1]
         green = raw_image[:, :, 2]
         red = raw_image[:, :, 3]
+        b5 = raw_image[:, :, 4]
+        b6 = raw_image[:, :, 5]
+        b7 = raw_image[:, :, 6]
         nir = raw_image[:, :, 7]
+        b8a = raw_image[:, :, 8]
         swir1 = raw_image[:, :, 10]
+        swir2 = raw_image[:, :, 11]
+        
+        # Terrain features
         slope = raw_image[:, :, 12]
         dem = raw_image[:, :, 13]
 
-        northness, curvature, hillshade = compute_topographical_features(dem, slope)
+        northness, eastness, curvature = compute_topographical_features(dem, slope)
 
         ndvi = (nir - red) / (nir + red + eps)
 
@@ -162,19 +167,22 @@ class LandslideDataset(Dataset):
 
         ndwi = (green - nir) / (green + nir + eps)
 
-        image_8ch = np.stack(
-            [dem, slope, northness, curvature, hillshade, ndvi, bsi, ndwi], axis=-1
-        )  # final 8 channel raster
+        image_18ch = np.stack(
+            [dem, slope, northness, eastness, curvature, blue, green, red, nir, b5, b6, b7, b8a, swir1, swir2, ndvi, bsi, ndwi], axis=-1
+        ).astype(np.float32)  # final 18 channel raster
+        
+        if self.mean is not None and self.std is not None:
+            image_18ch = (image_18ch - self.mean) / (self.std + 1e-6)
 
         if self.transform:
             
-            augmented = self.transform(image=image_8ch, mask=mask)
+            augmented = self.transform(image=image_18ch, mask=mask)
             image = augmented['image'].float()
             mask = augmented['mask'].long()
         else:
-            image_8ch = image_8ch.transpose((2, 0, 1))  # (C, H, W)
+            image_18ch = image_18ch.transpose((2, 0, 1))  # (C, H, W)
 
-            image = torch.from_numpy(image_8ch).float()
+            image = torch.from_numpy(image_18ch).float()
             mask = torch.from_numpy(mask).long()
             
 

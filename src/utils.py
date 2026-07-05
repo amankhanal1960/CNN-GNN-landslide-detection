@@ -3,7 +3,6 @@ import torch.nn as nn
 
 # ----- LOSS FUNCTION
 
-
 class DiceLoss(nn.Module):
     def __init__(self, smooth=1.0):
         super().__init__()
@@ -63,23 +62,11 @@ class CombinedFocalDiceLoss(nn.Module):
 
 def compute_metrics(predictions, targets, threshold=0.5):
 
-    pred_labels = torch.argmax(predictions, dim=1)
-    # view(-1) -> Flattens everything for into 1d vector
-    pred = pred_labels.view(-1).cpu()
-    true = targets.view(-1).cpu()
+    probs = torch.softmax(predictions, dim=1)[:, 1]
+    pred = probs > threshold
 
-    tp = ((true == 1) & (pred == 1)).sum().float()
-    fp = ((true == 0) & (pred == 1)).sum().float()
-    fn = ((true == 1) & (pred == 0)).sum().float()
+    tp = ((targets == 1) & (pred == 1)).sum().float()
+    fp = ((targets == 0) & (pred == 1)).sum().float()
+    fn = ((targets == 1) & (pred == 0)).sum().float()
 
-    precision = tp / (tp + fp + 1e-6)
-    recall = tp / (tp + fn + 1e-6)
-    f1 = 2 * precision * recall / (precision + recall + 1e-6)
-    iou = tp / (tp + fp + fn + 1e-6)
-
-    return {
-        "iou": iou.item(),
-        "f1": f1.item(),
-        "precision": precision.item(),
-        "recall": recall.item(),
-    }
+    return tp, fp, fn

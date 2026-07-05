@@ -1,9 +1,10 @@
 import os
+from src import ResUNet
 import torch
 from torch import optim
 from torch.utils.data import DataLoader
 from numpy import random
-from src.dataset import LandslideDataset, train_transform, val_transform
+from src.data import LandslideDataset, compute_normalization, train_transform, val_transform
 from src.UNet_only import UNet
 from src.utils import CombinedFocalDiceLoss, compute_metrics
 
@@ -27,16 +28,19 @@ def train(img_dir, mask_dir, num_epochs, batch_size, lr, save_path):
     
     print(f"Total Samples: {len(all_ids)} | Train: {len(train_ids)} | Val: {len(val_ids)}")
     
-    train_dataset = LandslideDataset(img_dir=img_dir, mask_dir=mask_dir, transform=train_transform(), file_ids=train_ids)
-    val_dataset = LandslideDataset(img_dir=img_dir, mask_dir=mask_dir, transform=val_transform(), file_ids=val_ids)
+    # Computing the mean and the standard deviations
+    MEAN, STD = compute_normalization(img_dir, train_ids)
+    
+    train_dataset = LandslideDataset(img_dir=img_dir, mask_dir=mask_dir, transform=train_transform(), file_ids=train_ids, mean=MEAN, std=STD)
+    val_dataset = LandslideDataset(img_dir=img_dir, mask_dir=mask_dir, transform=val_transform(), file_ids=val_ids, mean=MEAN, std=STD)
     
     train_loader = DataLoader(train_dataset, batch_size=batch_size,  shuffle=True, num_workers=2)
     val_loader = DataLoader(val_dataset, batch_size=batch_size, shuffle=False, num_workers=2)
     
     
     # ----- Model, Loss and Optimizer ----- #
-    model = UNet(in_channels=8, num_classes=2).to(device)
-    criterion = CombinedFocalDiceLoss(focal_weight=0.5, dice_weight=0.5, alpha=0.75, gamma=2.0)
+    model = ResUNet(in_channels=18, num_classes=2).to(device)
+    criterion = CombinedFocalDiceLoss(focal_weight=0.4, dice_weight=0.6, alpha=0.85, gamma=2.0)
     optimizer = optim.Adam(model.parameters(), lr=lr)
     
     scheduler = optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode="min", patience=5, factor=0.5, verbose=True)
@@ -62,8 +66,10 @@ def train(img_dir, mask_dir, num_epochs, batch_size, lr, save_path):
         model.eval()
         running_val_loss = 0.0
         
-        # Lists to temporarily hold metrics across validation batches
-        val_iou, val_f1, val_prec, val_rec = [], [], [], []
+        
+        total_tp = 0
+        total_fp = 0
+        total_fn = 0
         
         with torch.no_grad(): # Disable gradient engine to save memory
             for images, targets in val_loader:
@@ -75,10 +81,9 @@ def train(img_dir, mask_dir, num_epochs, batch_size, lr, save_path):
                 
                 # Calculate metrics for this batch using your dictionary utility
                 batch_metrics = compute_metrics(predictions, targets)
-                val_iou.append(batch_metrics["iou"])
-                val_f1.append(batch_metrics["f1"])
-                val_prec.append(batch_metrics["precision"])
-                val_rec.append(batch_metrics["recall"])
+                total_tp += batch_metrics[0]
+                total_fp += batch_metrics[1]
+                total_fn += batch_metrics[2]
 
         val_loss = running_val_loss / len(val_loader)
         
@@ -87,10 +92,10 @@ def train(img_dir, mask_dir, num_epochs, batch_size, lr, save_path):
         
         # Average the metrics over all validation batches
         val_metrics = {
-            "iou": sum(val_iou) / len(val_iou),
-            "f1": sum(val_f1) / len(val_f1),
-            "precision": sum(val_prec) / len(val_prec),
-            "recall": sum(val_rec) / len(val_rec)
+            "iou": total_tp / (total_tp + total_fp + total_fn + 1e-6),
+            "f1": 2 * total_tp / (2 * total_tp + total_fp + total_fn + 1e-6),
+            "precision": total_tp / (total_tp + total_fp + 1e-6),
+            "recall": total_tp / (total_tp + total_fn + 1e-6)
         }
 
         # ---- Print Progress ----- #
@@ -109,11 +114,26 @@ def train(img_dir, mask_dir, num_epochs, batch_size, lr, save_path):
 
 
 if __name__ == "__main__":
-    train(
-        img_dir    = "E:\\Major project\\Datasets\\landslide4sense\\TrainData\\img",
-        mask_dir   = "E:\\Major project\\Datasets\\landslide4sense\\TrainData\\mask",
-        num_epochs = 50,
-        batch_size = 16,
-        lr         = 1e-4,
-        save_path  = "best_unet_model.pth"
+    # 1. Corrected Cloud Paths (Updated with the landslide4sense parent folder)
+    IMG_DIR  = "/content/landslide4sense/TrainData/img"
+    MASK_DIR = "/content/landslide4sense/TrainData/mask"
+    
+    # 2. Permanent Cloud Storage (Saves the model weights directly to your Google Drive)
+    SAVE_PATH = "/content/drive/MyDrive/best_unet_model.pth"
+
+    # 3. Hyperparameters
+    BATCH_SIZE = 16  
+    EPOCHS     = 65
+    LEARNING_RATE = 1e-4
+
+    print("--- Starting Cloud Landslide Mapping Pipeline ---")
+    
+    # 4. Kick off training
+    trained_model = train(
+        img_dir    = IMG_DIR,
+        mask_dir   = MASK_DIR,
+        num_epochs = EPOCHS,
+        batch_size = BATCH_SIZE,
+        lr         = LEARNING_RATE,
+        save_path  = SAVE_PATH
     )
