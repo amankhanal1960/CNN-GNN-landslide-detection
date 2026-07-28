@@ -54,7 +54,7 @@ def load_inventories():
     langtang = langtang.to_crs(target_crs)
     asm_recent = asm_recent.to_crs(target_crs)
     
-    combined = gpd.concat (
+    combined = pd.concat (
           [arniko[["geometry", "source_inv"]],
            langtang[["geometry", "source_inv"]],
            asm[["geometry", "source_inv"]]],
@@ -62,3 +62,15 @@ def load_inventories():
     )
     combined = gpd.GeoDataFrame(combined, geometry="geometry", crs=target_crs)
     return combined
+
+# step-2 Build a square tile geometry around each landslide
+
+def make_tile_geometry(geom, size_m=TILE_SIZE_M, metric_crs="EPSG:32645"):
+      """Centered square tile in lat/lon, sized to cover the polygon + margin"""  
+      g = gpd.GeoSeries([geom], crs="EPSG:4326").to_crs(metric_crs).iloc[0]
+      cx, cy = g.centroid.x, g.centroid.y
+      half = max(size_m, (max(g.bounds[2]-g.bounds[0], g.bounds[3]-g.bounds[1]) + 200)) / 2
+      tile_m = box(cx - half, cy - half, cx + half, cy + half)
+      tile_ll = gpd.GeoSeries([tile_m], crs=metric_crs).to_crs("EPSG:4326").iloc[0]
+      return tile_ll
+
