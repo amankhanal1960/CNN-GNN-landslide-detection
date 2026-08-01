@@ -10,12 +10,14 @@ import geemap
 import rasterio
 from rasterio.features import rasterize
 from shapely.geometry import box
+from pathlib import Path
 
 GEE_PROJECT_ID = "nepal-landslide-extraction"
 
-ARNIKO_SHP      = ""
-LANGTANG_SHP    = ""
-ASM_SHP         = ""
+root = Path("E:\\Major project")
+ASM_SHP = (root/"Datasets"/"asian"/"DataFile1 - 12838ASMInventory.shp")
+LANGTANG_SHP = (root/"Datasets"/"lantang-valley"/"DataFile3_-_LangtangInventory.shp")
+ARNIKO_SHP = (root/"Datasets"/"Araniko"/"DataFile4_-_ArnikoInventory.shp")
 
 ASM_DATE_FIELD = "Post_Sat"
 
@@ -23,10 +25,10 @@ TILE_PX         = 128
 TILE_RES_M      = 10
 TILE_SIZE_M     = TILE_PX * TILE_RES_M
 
-OUTPUT_IMG_DIR  = "output/img"
-OUTPUT_MASK_DIR = "output/masks"
+OUTPUT_IMG_DIR  = root/"output/img"
+OUTPUT_MASK_DIR = root/"output/masks"
 
-S2_BANDS = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9',  'B11', 'B12']
+S2_BANDS = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B8A', 'B9',  'B11', 'B12']
 # 0:B1 1:B2(blue) 2:B3(green) 3:B4(red) 4:B5 5:B6 6:B7 7:B8(nir) 8:B8A 9:B9
 # 10:B11(swir1) 11:B12(swir2) 12:slope 13:dem
 
@@ -57,10 +59,15 @@ def load_inventories():
     langtang = langtang.to_crs(target_crs)
     asm_recent = asm_recent.to_crs(target_crs)
     
+    # since for langtang and arniko are from a single time period, we can fallback to a default date of 2017-11-01 for the center of the temporal window
+    keep_cols = ["geometry", "source_inv", ASM_DATE_FIELD]
+    arniko[ASM_DATE_FIELD] = pd.NaT
+    langtang[ASM_DATE_FIELD] = pd.NaT
+    
     combined = pd.concat (
-          [arniko[["geometry", "source_inv"]],
-           langtang[["geometry", "source_inv"]],
-           asm[["geometry", "source_inv"]]],
+          [arniko[keep_cols],
+           langtang[keep_cols],
+           asm_recent[keep_cols]],
            ignore_index=True
     )
     combined = gpd.GeoDataFrame(combined, geometry="geometry", crs=target_crs)
@@ -76,6 +83,7 @@ def make_tile_geometry(geom, size_m=TILE_SIZE_M, metric_crs="EPSG:32645"):
       #compute half width in meters
       half = size_m / 2
       # construct a square box geometry in METERS
+      # this places the centroid of the landslide exactly in the center of the frame
       tile_m = box(cx - half, cy - half, cx + half, cy + half)
       # Reproject the square box back to degrees for google earth engine
       tile_ll = gpd.GeoSeries([tile_m], crs=metric_crs).to_crs("EPSG:4326").iloc[0]
@@ -113,7 +121,7 @@ def get_stacked_image(tile_geom, center_date, window_days=45, max_cloud=30):
             return None
       
       # only select the s2 bands and ignore the others
-      s2_selected =s2_image.select(S2_BANDS)
+      s2_selected = s2_image.select(S2_BANDS)
       #loads the JAXA ALOS World 3D(30m resolution) dataset
       #picks the digital surface model band
       # clip(ee_geom): crops he huge global elevation dataset down to the exact 1280x1280m tile
@@ -122,14 +130,14 @@ def get_stacked_image(tile_geom, center_date, window_days=45, max_cloud=30):
       slope = ee.Terrain.slope(dem)
       
       # Glues i band slope and dem to the 12 sentinel-2 optical bands using addbands()
-      stacked = s2_selected.addBands(slope.rename("slope")).addbands(dem.rename("dem"))
+      stacked = s2_selected.addBands(slope.rename("slope")).addBands(dem.rename("dem"))
           
       return stacked, ee_geom  
       
 def download_tile_array(stacked_image, ee_geom, out_path, scale=TILE_RES_M):
       geemap.ee_export_image(
             stacked_image,
-            file_name=out_path,
+            filename=out_path,
             scale=scale,
             region=ee_geom,
             file_per_band=False
@@ -157,3 +165,71 @@ def rasterize_mask_for_tile(landslide_polys, tif_path):
       )
       return mask.astype(np.int64) # converts the final to 64 bit
 
+# Step-6 - Main Extraction Loop
+
+def extract_dataset(candidates, all_landslide_polys, target_count=2000, random_state=42):
+      os.makedirs(OUTPUT_IMG_DIR, exist_ok=True)
+      os.makedirs(OUTPUT_MASK_DIR, exist_ok=True)
+      
+      #Shuffle candidates: shufflles to draw propotionally drom all the three instead of just taking whatever
+      candidates = candidates.sample(frac=1, random_state=random_state).reset_index(drop=True)
+      
+      idx = 1
+      for _, row in candidates.iterrows():
+            if idx > target_count:
+                  break
+            
+            tile_geom = make_tile_geometry(row.geometry)
+            
+            center_date = row.get(ASM_DATE_FIELD)
+            if pd.isna(center_date):
+                  center_date = pd.Timestamp("2017-11-01")
+            
+            result = get_stacked_image(tile_geom, center_date)
+            if result is None:
+                  continue
+            stacked_image, ee_geom = result
+            
+            tif_path = f"/tmp/tile_{idx}.tif"
+            download_tile_array(stacked_image, ee_geom, tif_path)
+            
+            with rasterio.open(tif_path) as src:
+                  arr = src.read() # here the shape is (14, H, W)
+                  arr = np.transpose(arr, (1, 2, 0)) # -> (H, W, 14)
+                  
+            # Guard against off-by-one pixel exports -> crop or pad to exactly TILE_PX x TILE_PX
+            h, w , _ = arr.shape
+            if (h, w) != (TILE_PX, TILE_PX):
+                  fixed = np.zeros((TILE_PX, TILE_PX, arr.shape[2]), dtype=arr.dtype)
+                  # : selects from index to the end
+                  # min(h, TILE_PX) ensures that we don't go out of bounds if the image is smaller than TILE_PX
+                  # min(w, TILE_PX) does the same for width
+                  fixed[:min(h, TILE_PX), :min(w, TILE_PX), :] = arr[:min(h, TILE_PX), :min(w, TILE_PX)]
+                  arr = fixed
+                  
+            overlapping = all_landslide_polys[all_landslide_polys.intersects(tile_geom)]
+                  
+            mask = rasterize_mask_for_tile(overlapping.geometry.tolist(), tif_path)
+                  
+            with h5py.File(os.path.join(OUTPUT_IMG_DIR, f"image_{idx}.h5"), "w") as f:
+                  f.create_dataset("img", data=arr.astype(np.float32))
+            
+            with h5py.File(os.path.join(OUTPUT_MASK_DIR, f"mask_{idx}.h5"), "w") as f:
+                  f.create_dataset("mask", data=mask)
+                        
+            idx += 1
+                  
+            print(f"Extracted {idx-1} / {target_count} tiles")
+                              
+
+# if __name__ == "__main__":
+#       ee.Initialize(project=GEE_PROJECT_ID)
+      
+#       candidates = load_inventories()
+      
+#       extract_dataset(candidates, all_landslide_polys=candidates, target_count=2000, random_state=42)
+
+if __name__ == "__main__":
+      ee.Initialize(project=GEE_PROJECT_ID)
+      
+      candidates = load_inventories()
