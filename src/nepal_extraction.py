@@ -12,6 +12,8 @@ from rasterio.features import rasterize
 from shapely import is_empty
 from shapely.geometry import box
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor, as_completed
+from tqdm import tqdm
 
 GEE_PROJECT_ID = "nepal-landslide-extraction"
 
@@ -153,8 +155,11 @@ def get_stacked_image(tile_geom, center_date, window_days=45, max_cloud=30):
             .filterBounds(ee_geom)
             .select("DSM")
             .mosaic()
+            # a mossaic() og an imagecollection defaults to the earths engine fallback projection at 1 degree scale(111km/pixel). when calculating slope( change in dem)/(change in distance) , the distance used is 111km not 30m. this results in a slope that is way too small and not useful 
+            .reproject(crs="EPSG:4326", scale=30)
       )
       slope = ee.Terrain.slope(dem)
+      
       stacked = (s2_selected
                  .addBands(slope.rename("slope"))
                  .addBands(dem.rename("dem"))
@@ -197,78 +202,180 @@ def rasterize_mask_for_tile(landslide_polys, tif_path):
 
 # Step-6 - Main Extraction Loop
 
-def extract_dataset(candidates, all_landslide_polys, target_count=2500, random_state=42):
-      os.makedirs(OUTPUT_IMG_DIR, exist_ok=True)
-      os.makedirs(OUTPUT_MASK_DIR, exist_ok=True)
+# def extract_dataset(candidates, all_landslide_polys, target_count=2500, random_state=42):
+#       os.makedirs(OUTPUT_IMG_DIR, exist_ok=True)
+#       os.makedirs(OUTPUT_MASK_DIR, exist_ok=True)
       
-      # Pre-converting landslide polygons to EPSG:4326 for rasterization.
-      all_landslide_polys_4326 = all_landslide_polys.to_crs("EPSG:4326")
+#       # Pre-converting landslide polygons to EPSG:4326 for rasterization.
+#       all_landslide_polys_4326 = all_landslide_polys.to_crs("EPSG:4326")
       
-      #Shuffle candidates: shufflles to draw propotionally drom all the three instead of just taking whatever
-      candidates = candidates.sample(frac=1, random_state=random_state).reset_index(drop=True)
+#       #Shuffle candidates: shufflles to draw propotionally drom all the three instead of just taking whatever
+#       candidates = candidates.sample(frac=1, random_state=random_state).reset_index(drop=True)
       
-      idx = 1
-      for _, row in candidates.iterrows():
-            if idx > target_count:
-                  break
-            try:
-                  tile_geom = make_tile_geometry(row.geometry, src_crs=candidates.crs)
+#       idx = 1
+#       for _, row in candidates.iterrows():
+#             if idx > target_count:
+#                   break
+#             try:
+#                   tile_geom = make_tile_geometry(row.geometry, src_crs=candidates.crs)
                   
-                  center_date = row.get(ASM_DATE_FIELD)
-                  if pd.isna(center_date):
-                        center_date = pd.Timestamp("2017-11-01")
+#                   center_date = row.get(ASM_DATE_FIELD)
+#                   if pd.isna(center_date):
+#                         center_date = pd.Timestamp("2017-11-01")
                   
-                  result = get_stacked_image(tile_geom, center_date)
-                  if result is None:
-                        continue
-                  stacked_image, ee_geom = result
+#                   result = get_stacked_image(tile_geom, center_date)
+#                   if result is None:
+#                         continue
+#                   stacked_image, ee_geom = result
                   
-                  temp_dir = root / "output" / "temp"
-                  os.makedirs(temp_dir, exist_ok=True)
-                  tif_path = str(temp_dir / f"tile_{idx}.tif")
+#                   temp_dir = root / "output" / "temp"
+#                   os.makedirs(temp_dir, exist_ok=True)
+#                   tif_path = str(temp_dir / f"tile_{idx}.tif")
                   
-                  download_tile_array(stacked_image, ee_geom, tif_path)
+#                   download_tile_array(stacked_image, ee_geom, tif_path)
                   
-                  with rasterio.open(tif_path) as src:
-                        arr = src.read() # here the shape is (14, H, W)
-                        arr = np.transpose(arr, (1, 2, 0)) # -> (H, W, 14)
+#                   with rasterio.open(tif_path) as src:
+#                         arr = src.read() # here the shape is (14, H, W)
+#                         arr = np.transpose(arr, (1, 2, 0)) # -> (H, W, 14)
                         
-                  overlapping = all_landslide_polys_4326[all_landslide_polys_4326.intersects(tile_geom)]
-                  mask = rasterize_mask_for_tile(overlapping.geometry.tolist(), tif_path)
+#                   overlapping = all_landslide_polys_4326[all_landslide_polys_4326.intersects(tile_geom)]
+#                   mask = rasterize_mask_for_tile(overlapping.geometry.tolist(), tif_path)
                         
-                  # Guard against off-by-one pixel exports -> crop or pad to exactly TILE_PX x TILE_PX
-                  h, w , _ = arr.shape
-                  if (h, w) != (TILE_PX, TILE_PX):
-                        fixed_arr = np.zeros((TILE_PX, TILE_PX, arr.shape[2]), dtype=arr.dtype)
-                        # : selects from index to the end
-                        # min(h, TILE_PX) ensures that we don't go out of bounds if the image is smaller than TILE_PX
-                        # min(w, TILE_PX) does the same for width
-                        fixed_arr[:min(h, TILE_PX), :min(w, TILE_PX), :] = arr[:min(h, TILE_PX), :min(w, TILE_PX)]
-                        arr = fixed_arr
+#                   # Guard against off-by-one pixel exports -> crop or pad to exactly TILE_PX x TILE_PX
+#                   h, w , _ = arr.shape
+#                   if (h, w) != (TILE_PX, TILE_PX):
+#                         fixed_arr = np.zeros((TILE_PX, TILE_PX, arr.shape[2]), dtype=arr.dtype)
+#                         # : selects from index to the end
+#                         # min(h, TILE_PX) ensures that we don't go out of bounds if the image is smaller than TILE_PX
+#                         # min(w, TILE_PX) does the same for width
+#                         fixed_arr[:min(h, TILE_PX), :min(w, TILE_PX), :] = arr[:min(h, TILE_PX), :min(w, TILE_PX)]
+#                         arr = fixed_arr
                         
-                        fixed_mask = np.zeros((TILE_PX, TILE_PX), dtype=mask.dtype)
-                        fixed_mask[:min(h, TILE_PX), :min(w, TILE_PX)] = mask[:min(h, TILE_PX), :min(w, TILE_PX)]
-                        mask = fixed_mask
+#                         fixed_mask = np.zeros((TILE_PX, TILE_PX), dtype=mask.dtype)
+#                         fixed_mask[:min(h, TILE_PX), :min(w, TILE_PX)] = mask[:min(h, TILE_PX), :min(w, TILE_PX)]
+#                         mask = fixed_mask
                   
                         
-                  with h5py.File(os.path.join(OUTPUT_IMG_DIR, f"image_{idx}.h5"), "w") as f:
-                        f.create_dataset("img", data=arr.astype(np.float32))
+#                   with h5py.File(os.path.join(OUTPUT_IMG_DIR, f"image_{idx}.h5"), "w") as f:
+#                         f.create_dataset("img", data=arr.astype(np.float32))
                   
-                  with h5py.File(os.path.join(OUTPUT_MASK_DIR, f"mask_{idx}.h5"), "w") as f:
-                        f.create_dataset("mask", data=mask)
+#                   with h5py.File(os.path.join(OUTPUT_MASK_DIR, f"mask_{idx}.h5"), "w") as f:
+#                         f.create_dataset("mask", data=mask)
                         
-                  if os.path.exists(tif_path):
-                        os.remove(tif_path)
+#                   if os.path.exists(tif_path):
+#                         os.remove(tif_path)
                               
-                  idx += 1
-                  print(f"Extracted {idx-1} / {target_count} tiles")
+#                   idx += 1
+#                   print(f"Extracted {idx-1} / {target_count} tiles")
                   
-            except Exception as e:
-                  print(f"Error processing landslide {idx}: {e}")
-                  if 'tif_path' in locals() and os.path.exists(tif_path):
-                        os.remove(tif_path)
-                  continue                 
+#             except Exception as e:
+#                   print(f"Error processing landslide {idx}: {e}")
+#                   if 'tif_path' in locals() and os.path.exists(tif_path):
+#                         os.remove(tif_path)
+#                   continue                 
 
+
+def process_single_tile(task_args):
+    """Worker function to process a single tile independently."""
+    idx, row, candidates_crs, all_landslide_polys_4326, temp_dir = task_args
+    
+    # Unique temporary file path per worker thread
+    tif_path = str(temp_dir / f"tile_{idx}.tif")
+    img_h5_path = os.path.join(OUTPUT_IMG_DIR, f"image_{idx}.h5")
+    mask_h5_path = os.path.join(OUTPUT_MASK_DIR, f"mask_{idx}.h5")
+    
+    # Resume capability: skip if tile is already extracted
+    if os.path.exists(img_h5_path) and os.path.exists(mask_h5_path):
+        return True, idx, None
+
+    try:
+        tile_geom = make_tile_geometry(row.geometry, src_crs=candidates_crs)
+        
+        center_date = row.get(ASM_DATE_FIELD)
+        if pd.isna(center_date):
+            center_date = pd.Timestamp("2017-11-01")
+        
+        result = get_stacked_image(tile_geom, center_date)
+        if result is None:
+            return False, idx, "No Sentinel-2 image found"
+            
+        stacked_image, ee_geom = result
+        
+        # Download tile array via geemap
+        download_tile_array(stacked_image, ee_geom, tif_path)
+        
+        with rasterio.open(tif_path) as src:
+            arr = src.read()  # Shape: (14, H, W)
+            arr = np.transpose(arr, (1, 2, 0))  # Shape: (H, W, 14)
+            
+        overlapping = all_landslide_polys_4326[all_landslide_polys_4326.intersects(tile_geom)]
+        mask = rasterize_mask_for_tile(overlapping.geometry.tolist(), tif_path)
+            
+        # Crop or pad to exactly TILE_PX x TILE_PX
+        h, w, _ = arr.shape
+        if (h, w) != (TILE_PX, TILE_PX):
+            fixed_arr = np.zeros((TILE_PX, TILE_PX, arr.shape[2]), dtype=arr.dtype)
+            fixed_arr[:min(h, TILE_PX), :min(w, TILE_PX), :] = arr[:min(h, TILE_PX), :min(w, TILE_PX)]
+            arr = fixed_arr
+            
+            fixed_mask = np.zeros((TILE_PX, TILE_PX), dtype=mask.dtype)
+            fixed_mask[:min(h, TILE_PX), :min(w, TILE_PX)] = mask[:min(h, TILE_PX), :min(w, TILE_PX)]
+            mask = fixed_mask
+
+        # Save outputs
+        with h5py.File(img_h5_path, "w") as f:
+            f.create_dataset("img", data=arr.astype(np.float32))
+            
+        with h5py.File(mask_h5_path, "w") as f:
+            f.create_dataset("mask", data=mask)
+            
+        return True, idx, None
+
+    except Exception as e:
+        return False, idx, str(e)
+        
+    finally:
+        # Guarantee cleanup of thread-specific temporary GeoTIFF
+        if os.path.exists(tif_path):
+            try:
+                os.remove(tif_path)
+            except OSError:
+                pass
+
+
+def extract_dataset(candidates, all_landslide_polys, target_count=2500, random_state=42, max_workers=10):
+    os.makedirs(OUTPUT_IMG_DIR, exist_ok=True)
+    os.makedirs(OUTPUT_MASK_DIR, exist_ok=True)
+    
+    temp_dir = root / "output" / "temp"
+    os.makedirs(temp_dir, exist_ok=True)
+    
+    all_landslide_polys_4326 = all_landslide_polys.to_crs("EPSG:4326")
+    candidates = candidates.sample(frac=1, random_state=random_state).reset_index(drop=True)
+    
+    # Build distinct task arguments for each tile
+    tasks = []
+    candidates_crs = candidates.crs
+    
+    for idx, (_, row) in enumerate(candidates.iloc[:target_count].iterrows(), start=1):
+        tasks.append((idx, row, candidates_crs, all_landslide_polys_4326, temp_dir))
+        
+    print(f"Starting parallel extraction of {len(tasks)} tiles using {max_workers} worker threads...")
+    
+    successful = 0
+    with ThreadPoolExecutor(max_workers=max_workers) as executor:
+        futures = [executor.submit(process_single_tile, task) for task in tasks]
+        
+        for future in tqdm(as_completed(futures), total=len(futures), desc="Extracting Tiles"):
+            success, idx, err = future.result()
+            if success:
+                successful += 1
+            elif err:
+                print(f"Tile {idx} skipped: {err}")
+                
+    print(f"Extraction complete: Successfully extracted {successful} / {len(tasks)} tiles.")
+    
+    
 if __name__ == "__main__":
       ee.Initialize(project=GEE_PROJECT_ID)
       
