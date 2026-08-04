@@ -1,5 +1,3 @@
-from numpy import identity
-
 import torch
 import torch.nn as nn
 
@@ -11,7 +9,7 @@ class ResidualBlock(nn.Module):
         # First convolution
         self.conv1 = nn.Conv2d(in_channels, out_channels, kernel_size=3, padding=1, bias=False)
         self.bn1 = nn.BatchNorm2d(out_channels)
-        self.relu = nn.ReLU(inplace=True)
+        self.relu = nn.ReLU(inplace=False)
         
         # Second convolution
         self.conv2 = nn.Conv2d(out_channels, out_channels, kernel_size=3, padding=1, bias=False)
@@ -20,7 +18,7 @@ class ResidualBlock(nn.Module):
         # Shortcut connection
         # if the input and the output dont match, we need a 1x1 convolution,
         # to project the correct input before adding.
-        self.shortcut = nn.Sequetial()
+        self.shortcut = nn.Sequential()
         if in_channels != out_channels:
             self.shortcut = nn.Sequential(
                 nn.Conv2d(in_channels, out_channels, kernel_size=1, bias=False),
@@ -38,7 +36,7 @@ class ResidualBlock(nn.Module):
         out = self.conv2(out)
         out = self.bn2(out)
         
-        out += identity
+        out = out + identity
         out = self.relu(out)
         
         return out
@@ -75,7 +73,7 @@ class DecoderBlock(nn.Module):
         return x
     
 class ResUNet(nn.Module):
-    def __init__(self, in_channels=8, num_classes=2):
+    def __init__(self, in_channels=17, num_classes=2):
         super().__init__()
 
         # --Encoding Phase -- 

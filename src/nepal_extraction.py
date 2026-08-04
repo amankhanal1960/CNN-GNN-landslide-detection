@@ -39,7 +39,7 @@ TILE_SIZE_M     = TILE_PX * TILE_RES_M
 OUTPUT_IMG_DIR  = root/"output/img"
 OUTPUT_MASK_DIR = root/"output/masks"
 
-S2_BANDS = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B9', 'B10',  'B11', 'B12']
+S2_BANDS = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B8A', 'B9',  'B11', 'B12']
 # 0:B1 1:B2(blue) 2:B3(green) 3:B4(red) 4:B5 5:B6 6:B7 7:B8(nir) 8:B9 9:B10
 # 10:B11(swir1) 11:B12(swir2) 12:slope 13:dem
 
@@ -134,7 +134,7 @@ def get_stacked_image(tile_geom, center_date, window_days=45, max_cloud=30):
       # fiterDate(start, end) : temporal filter-Limits the search to image take between the start date and the end date
       #last filter checks the metadata of each image and discards any image where the overall cloud percentage is greater or equal than max_cloud
       #.sort- orders the remaining iage in ascending order of 
-      s2_coll = (ee.ImageCollection("COPERNICUS/S2_HARMONIZED")
+      s2_coll = (ee.ImageCollection("COPERNICUS/S2_SR_HARMONIZED")
                  .filterBounds(ee_geom)
                  .filterDate(start, end)
                  .filter(ee.Filter.lt("CLOUDY_PIXEL_PERCENTAGE", max_cloud))
@@ -173,6 +173,7 @@ def download_tile_array(stacked_image, ee_geom, out_path, scale=TILE_RES_M):
             stacked_image,
             filename=out_path,
             scale=scale,
+            crs="EPSG:4326",
             region=ee_geom,
             file_per_band=False,
             verbose=False # Suppresses the progress bar and other messages during the download process
@@ -343,7 +344,7 @@ def process_single_tile(task_args):
                 pass
 
 
-def extract_dataset(candidates, all_landslide_polys, target_count=2500, random_state=42, max_workers=10):
+def extract_dataset(candidates, all_landslide_polys, target_count=2500, random_state=42, max_workers=14):
     os.makedirs(OUTPUT_IMG_DIR, exist_ok=True)
     os.makedirs(OUTPUT_MASK_DIR, exist_ok=True)
     
@@ -381,10 +382,10 @@ if __name__ == "__main__":
       
       candidates = load_inventories()
       
-      extract_dataset(candidates, all_landslide_polys=candidates, target_count=2500, random_state=42)
+      extract_dataset(candidates, all_landslide_polys=candidates, target_count=2650, random_state=42)
 
 
 # if __name__ == "__main__":
 #       ee.Initialize(project=GEE_PROJECT_ID)
-#       print(candidates.crs)
 #       candidates = load_inventories()
+#       print(candidates.crs)

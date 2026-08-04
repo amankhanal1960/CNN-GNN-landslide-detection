@@ -1,0 +1,13 @@
+# configs/default_config.yaml
+
+paths:
+  img_dir: "/content/Nepal_SR/img"
+  mask_dir: "/content/Nepal_SR/masks"
+  save_path: "/content/drive/MyDrive/best_nepal_model.pth"
+
+hyperparameters:
+  batch_size: 16
+  epochs: 75
+  learning_rate: 0.0001
+  graph_type: "local"
+  resume: false

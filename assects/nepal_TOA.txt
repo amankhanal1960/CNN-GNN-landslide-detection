@@ -1,0 +1,116 @@
+--- Starting Cloud Landslide Mapping Pipeline ---
+Using device: cuda
+Total Samples: 2648 | Train: 2250 | Val: 398
+
+--- Computing Normalization Statistics From Training Split ---
+Computed Means: [ 1.60131104e+03  3.14643784e+01 -5.06888330e-02  2.07156792e-01
+  2.75877210e-05  9.45000610e+02  8.44695984e+02  7.71611084e+02
+  1.99324146e+03  1.03018115e+03  1.69223169e+03  1.96579614e+03
+  1.78968420e+03  1.10349414e+03  4.26414102e-01 -1.05701625e-01
+ -3.66113812e-01]
+Computed Stds: [9.4048444e+02 1.1668222e+01 6.7941856e-01 7.0207441e-01 1.8253906e-02
+ 3.0646082e+02 3.4498471e+02 4.6011502e+02 8.2139471e+02 4.9180072e+02
+ 6.5603809e+02 7.7065033e+02 9.4431366e+02 7.5571265e+02 1.9109957e-01
+ 1.5718760e-01 1.8089908e-01]
+
+
+[INFO] Starting training entirely from scratch.
+Epoch [01/75] | Train Loss: 0.5859 | Val Loss: 0.5528  IoU: 0.2170  F1: 0.3566  Precision: 0.2581  Recall: 0.5762 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.3566
+Epoch [02/75] | Train Loss: 0.5166 | Val Loss: 0.5056  IoU: 0.2085  F1: 0.3450  Precision: 0.3461  Recall: 0.3439 | LR: 0.000100
+Epoch [03/75] | Train Loss: 0.4594 | Val Loss: 0.4255  IoU: 0.2881  F1: 0.4473  Precision: 0.3662  Recall: 0.5744 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.4473
+Epoch [04/75] | Train Loss: 0.4264 | Val Loss: 0.4043  IoU: 0.2690  F1: 0.4239  Precision: 0.3439  Recall: 0.5525 | LR: 0.000100
+Epoch [05/75] | Train Loss: 0.4111 | Val Loss: 0.4190  IoU: 0.2573  F1: 0.4092  Precision: 0.2983  Recall: 0.6517 | LR: 0.000100
+Epoch [06/75] | Train Loss: 0.4003 | Val Loss: 0.3849  IoU: 0.2960  F1: 0.4567  Precision: 0.4434  Recall: 0.4709 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.4567
+Epoch [07/75] | Train Loss: 0.3970 | Val Loss: 0.3894  IoU: 0.3024  F1: 0.4644  Precision: 0.3981  Recall: 0.5571 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.4644
+Epoch [08/75] | Train Loss: 0.3927 | Val Loss: 0.3954  IoU: 0.2802  F1: 0.4378  Precision: 0.4402  Recall: 0.4353 | LR: 0.000100
+Epoch [09/75] | Train Loss: 0.3858 | Val Loss: 0.3720  IoU: 0.3133  F1: 0.4771  Precision: 0.4336  Recall: 0.5302 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.4771
+Epoch [10/75] | Train Loss: 0.3836 | Val Loss: 0.3716  IoU: 0.3038  F1: 0.4660  Precision: 0.4688  Recall: 0.4633 | LR: 0.000100
+Epoch [11/75] | Train Loss: 0.3791 | Val Loss: 0.3822  IoU: 0.2898  F1: 0.4493  Precision: 0.5361  Recall: 0.3867 | LR: 0.000100
+Epoch [12/75] | Train Loss: 0.3752 | Val Loss: 0.3733  IoU: 0.3008  F1: 0.4625  Precision: 0.4151  Recall: 0.5220 | LR: 0.000100
+Epoch [13/75] | Train Loss: 0.3753 | Val Loss: 0.3644  IoU: 0.3262  F1: 0.4920  Precision: 0.4539  Recall: 0.5371 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.4920
+Epoch [14/75] | Train Loss: 0.3722 | Val Loss: 0.3694  IoU: 0.3226  F1: 0.4879  Precision: 0.4630  Recall: 0.5155 | LR: 0.000100
+Epoch [15/75] | Train Loss: 0.3674 | Val Loss: 0.3708  IoU: 0.3139  F1: 0.4778  Precision: 0.4154  Recall: 0.5623 | LR: 0.000100
+Epoch [16/75] | Train Loss: 0.3651 | Val Loss: 0.3602  IoU: 0.3252  F1: 0.4908  Precision: 0.4134  Recall: 0.6040 | LR: 0.000100
+Epoch [17/75] | Train Loss: 0.3642 | Val Loss: 0.3552  IoU: 0.3224  F1: 0.4876  Precision: 0.4907  Recall: 0.4845 | LR: 0.000100
+Epoch [18/75] | Train Loss: 0.3636 | Val Loss: 0.3679  IoU: 0.2842  F1: 0.4426  Precision: 0.5526  Recall: 0.3692 | LR: 0.000100
+Epoch [19/75] | Train Loss: 0.3594 | Val Loss: 0.3506  IoU: 0.3212  F1: 0.4862  Precision: 0.4352  Recall: 0.5508 | LR: 0.000100
+Epoch [20/75] | Train Loss: 0.3580 | Val Loss: 0.3461  IoU: 0.3533  F1: 0.5221  Precision: 0.5072  Recall: 0.5379 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5221
+Epoch [21/75] | Train Loss: 0.3551 | Val Loss: 0.3625  IoU: 0.3247  F1: 0.4902  Precision: 0.4855  Recall: 0.4950 | LR: 0.000100
+Epoch [22/75] | Train Loss: 0.3552 | Val Loss: 0.3514  IoU: 0.3378  F1: 0.5050  Precision: 0.5262  Recall: 0.4855 | LR: 0.000100
+Epoch [23/75] | Train Loss: 0.3541 | Val Loss: 0.3494  IoU: 0.3380  F1: 0.5053  Precision: 0.4989  Recall: 0.5117 | LR: 0.000100
+Epoch [24/75] | Train Loss: 0.3544 | Val Loss: 0.3544  IoU: 0.3332  F1: 0.4998  Precision: 0.4242  Recall: 0.6084 | LR: 0.000100
+Epoch [25/75] | Train Loss: 0.3514 | Val Loss: 0.3580  IoU: 0.3386  F1: 0.5060  Precision: 0.4205  Recall: 0.6351 | LR: 0.000100
+Epoch [26/75] | Train Loss: 0.3476 | Val Loss: 0.3455  IoU: 0.3609  F1: 0.5304  Precision: 0.5077  Recall: 0.5552 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5304
+Epoch [27/75] | Train Loss: 0.3464 | Val Loss: 0.3461  IoU: 0.3367  F1: 0.5037  Precision: 0.4770  Recall: 0.5337 | LR: 0.000100
+Epoch [28/75] | Train Loss: 0.3455 | Val Loss: 0.3399  IoU: 0.3549  F1: 0.5239  Precision: 0.4603  Recall: 0.6078 | LR: 0.000100
+Epoch [29/75] | Train Loss: 0.3460 | Val Loss: 0.3411  IoU: 0.3510  F1: 0.5197  Precision: 0.4759  Recall: 0.5722 | LR: 0.000100
+Epoch [30/75] | Train Loss: 0.3434 | Val Loss: 0.3527  IoU: 0.3655  F1: 0.5354  Precision: 0.5414  Recall: 0.5295 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5354
+Epoch [31/75] | Train Loss: 0.3442 | Val Loss: 0.3457  IoU: 0.3543  F1: 0.5233  Precision: 0.4668  Recall: 0.5953 | LR: 0.000100
+Epoch [32/75] | Train Loss: 0.3396 | Val Loss: 0.3540  IoU: 0.3586  F1: 0.5279  Precision: 0.4975  Recall: 0.5623 | LR: 0.000100
+Epoch [33/75] | Train Loss: 0.3395 | Val Loss: 0.3367  IoU: 0.3708  F1: 0.5410  Precision: 0.5282  Recall: 0.5544 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5410
+Epoch [34/75] | Train Loss: 0.3370 | Val Loss: 0.3404  IoU: 0.3577  F1: 0.5270  Precision: 0.4886  Recall: 0.5719 | LR: 0.000100
+Epoch [35/75] | Train Loss: 0.3362 | Val Loss: 0.3360  IoU: 0.3700  F1: 0.5401  Precision: 0.4821  Recall: 0.6141 | LR: 0.000100
+Epoch [36/75] | Train Loss: 0.3337 | Val Loss: 0.3417  IoU: 0.3658  F1: 0.5357  Precision: 0.4715  Recall: 0.6200 | LR: 0.000100
+Epoch [37/75] | Train Loss: 0.3334 | Val Loss: 0.3272  IoU: 0.3788  F1: 0.5495  Precision: 0.5079  Recall: 0.5985 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5495
+Epoch [38/75] | Train Loss: 0.3332 | Val Loss: 0.3290  IoU: 0.3804  F1: 0.5511  Precision: 0.5029  Recall: 0.6096 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5511
+Epoch [39/75] | Train Loss: 0.3331 | Val Loss: 0.3373  IoU: 0.3656  F1: 0.5355  Precision: 0.5085  Recall: 0.5655 | LR: 0.000100
+Epoch [40/75] | Train Loss: 0.3340 | Val Loss: 0.3291  IoU: 0.3741  F1: 0.5445  Precision: 0.4899  Recall: 0.6129 | LR: 0.000100
+Epoch [41/75] | Train Loss: 0.3290 | Val Loss: 0.3362  IoU: 0.3696  F1: 0.5397  Precision: 0.5031  Recall: 0.5822 | LR: 0.000100
+Epoch [42/75] | Train Loss: 0.3230 | Val Loss: 0.3268  IoU: 0.3764  F1: 0.5470  Precision: 0.5147  Recall: 0.5836 | LR: 0.000100
+Epoch [43/75] | Train Loss: 0.3208 | Val Loss: 0.3349  IoU: 0.3664  F1: 0.5363  Precision: 0.4552  Recall: 0.6527 | LR: 0.000100
+Epoch [44/75] | Train Loss: 0.3258 | Val Loss: 0.3366  IoU: 0.3717  F1: 0.5419  Precision: 0.5231  Recall: 0.5622 | LR: 0.000100
+Epoch [45/75] | Train Loss: 0.3230 | Val Loss: 0.3340  IoU: 0.3859  F1: 0.5568  Precision: 0.5107  Recall: 0.6122 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5568
+Epoch [46/75] | Train Loss: 0.3202 | Val Loss: 0.3340  IoU: 0.3795  F1: 0.5502  Precision: 0.4654  Recall: 0.6728 | LR: 0.000100
+Epoch [47/75] | Train Loss: 0.3202 | Val Loss: 0.3299  IoU: 0.3877  F1: 0.5587  Precision: 0.5147  Recall: 0.6110 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5587
+Epoch [48/75] | Train Loss: 0.3212 | Val Loss: 0.3279  IoU: 0.3732  F1: 0.5435  Precision: 0.4727  Recall: 0.6393 | LR: 0.000100
+Epoch [49/75] | Train Loss: 0.3149 | Val Loss: 0.3188  IoU: 0.3990  F1: 0.5704  Precision: 0.5253  Recall: 0.6239 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5704
+Epoch [50/75] | Train Loss: 0.3160 | Val Loss: 0.3309  IoU: 0.3631  F1: 0.5328  Precision: 0.5249  Recall: 0.5408 | LR: 0.000100
+Epoch [51/75] | Train Loss: 0.3190 | Val Loss: 0.3268  IoU: 0.3920  F1: 0.5632  Precision: 0.5076  Recall: 0.6325 | LR: 0.000100
+Epoch [52/75] | Train Loss: 0.3170 | Val Loss: 0.3259  IoU: 0.3933  F1: 0.5646  Precision: 0.4934  Recall: 0.6597 | LR: 0.000100
+Epoch [53/75] | Train Loss: 0.3120 | Val Loss: 0.3231  IoU: 0.3807  F1: 0.5515  Precision: 0.4717  Recall: 0.6638 | LR: 0.000100
+Epoch [54/75] | Train Loss: 0.3128 | Val Loss: 0.3159  IoU: 0.4002  F1: 0.5717  Precision: 0.5207  Recall: 0.6337 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5717
+Epoch [55/75] | Train Loss: 0.3098 | Val Loss: 0.3206  IoU: 0.4159  F1: 0.5875  Precision: 0.5539  Recall: 0.6254 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5875
+Epoch [56/75] | Train Loss: 0.3084 | Val Loss: 0.3136  IoU: 0.4224  F1: 0.5939  Precision: 0.5819  Recall: 0.6064 | LR: 0.000100
+ => Saved new best model checkpoint with F1: 0.5939
+Epoch [57/75] | Train Loss: 0.3067 | Val Loss: 0.3151  IoU: 0.4040  F1: 0.5755  Precision: 0.5825  Recall: 0.5686 | LR: 0.000100
+Epoch [58/75] | Train Loss: 0.3112 | Val Loss: 0.3189  IoU: 0.3993  F1: 0.5707  Precision: 0.5285  Recall: 0.6202 | LR: 0.000100
+Epoch [59/75] | Train Loss: 0.3117 | Val Loss: 0.3106  IoU: 0.4214  F1: 0.5929  Precision: 0.5875  Recall: 0.5984 | LR: 0.000100
+Epoch [60/75] | Train Loss: 0.3060 | Val Loss: 0.3129  IoU: 0.4117  F1: 0.5833  Precision: 0.5686  Recall: 0.5988 | LR: 0.000100
+Epoch [61/75] | Train Loss: 0.3033 | Val Loss: 0.3116  IoU: 0.4095  F1: 0.5810  Precision: 0.5026  Recall: 0.6885 | LR: 0.000100
+Epoch [62/75] | Train Loss: 0.3027 | Val Loss: 0.3114  IoU: 0.4009  F1: 0.5724  Precision: 0.5059  Recall: 0.6590 | LR: 0.000100
+Epoch [63/75] | Train Loss: 0.3023 | Val Loss: 0.3182  IoU: 0.3965  F1: 0.5678  Precision: 0.4808  Recall: 0.6933 | LR: 0.000100
+Epoch [64/75] | Train Loss: 0.3018 | Val Loss: 0.3148  IoU: 0.4215  F1: 0.5930  Precision: 0.5470  Recall: 0.6475 | LR: 0.000050
+Epoch [65/75] | Train Loss: 0.2900 | Val Loss: 0.3014  IoU: 0.4371  F1: 0.6083  Precision: 0.5824  Recall: 0.6366 | LR: 0.000050
+ => Saved new best model checkpoint with F1: 0.6083
+Epoch [66/75] | Train Loss: 0.2832 | Val Loss: 0.3020  IoU: 0.4422  F1: 0.6133  Precision: 0.5776  Recall: 0.6536 | LR: 0.000050
+ => Saved new best model checkpoint with F1: 0.6133
+Epoch [67/75] | Train Loss: 0.2830 | Val Loss: 0.3055  IoU: 0.4172  F1: 0.5888  Precision: 0.5326  Recall: 0.6582 | LR: 0.000050
+Epoch [68/75] | Train Loss: 0.2813 | Val Loss: 0.3028  IoU: 0.4456  F1: 0.6165  Precision: 0.5998  Recall: 0.6342 | LR: 0.000050
+ => Saved new best model checkpoint with F1: 0.6165
+Epoch [69/75] | Train Loss: 0.2816 | Val Loss: 0.3052  IoU: 0.4320  F1: 0.6034  Precision: 0.5761  Recall: 0.6333 | LR: 0.000050
+Epoch [70/75] | Train Loss: 0.2785 | Val Loss: 0.3010  IoU: 0.4401  F1: 0.6112  Precision: 0.5905  Recall: 0.6333 | LR: 0.000050
+Epoch [71/75] | Train Loss: 0.2766 | Val Loss: 0.3009  IoU: 0.4507  F1: 0.6214  Precision: 0.6227  Recall: 0.6200 | LR: 0.000050
+ => Saved new best model checkpoint with F1: 0.6214
+Epoch [72/75] | Train Loss: 0.2792 | Val Loss: 0.3021  IoU: 0.4412  F1: 0.6122  Precision: 0.5680  Recall: 0.6639 | LR: 0.000050
+Epoch [73/75] | Train Loss: 0.2760 | Val Loss: 0.3031  IoU: 0.4384  F1: 0.6096  Precision: 0.5447  Recall: 0.6921 | LR: 0.000050
+Epoch [74/75] | Train Loss: 0.2742 | Val Loss: 0.3018  IoU: 0.4331  F1: 0.6045  Precision: 0.5455  Recall: 0.6778 | LR: 0.000050
+Epoch [75/75] | Train Loss: 0.2725 | Val Loss: 0.3019  IoU: 0.4480  F1: 0.6188  Precision: 0.5679  Recall: 0.6797 | LR: 0.000050
+
+Training Complete! The best model achieved a Val F1 of 0.6214 and is saved at: /content/drive/MyDrive/best_nepal_model.pth

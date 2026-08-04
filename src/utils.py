@@ -9,7 +9,7 @@ class DiceLoss(nn.Module):
         self.smooth = smooth
 
     def forward(self, predictions, targets):
-        probs = torch.softmax(predictions, dim=1)[:, 1]
+        probs = torch.softmax(predictions, dim=1)[:, 1, :, :]
         targets_f = targets.float()
 
         intersection = (probs * targets_f).sum(dim=(1, 2))

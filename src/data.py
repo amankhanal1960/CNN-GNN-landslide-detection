@@ -4,9 +4,10 @@ import torch
 from torch.utils.data import Dataset
 import numpy as np
 import albumentations as A
-from albumentations.pytorch import ToTensorV2   
+from albumentations.pytorch import ToTensorV2 
+import cv2  
 
-def compute_topographical_features(dem, slope_deg, res=10.0, azimuth=315, angle_altitude=45):
+def compute_topographical_features(dem, res=10.0):
     """ Compute northness, eastness, profile curvature"""
 
     dem_padded = np.pad(dem, pad_width=1, mode="edge")
@@ -32,7 +33,7 @@ def compute_topographical_features(dem, slope_deg, res=10.0, azimuth=315, angle_
 
 def compute_normalization(img_dir, file_ids): 
     """ Compute the mean and the standard deviation from the training set only. Protected against NaN vlaues. """
-    N_CHANNELS = 18
+    N_CHANNELS = 17
     channel_sum = np.zeros(N_CHANNELS, dtype=np.float64)
     channel_squared_sum = np.zeros(N_CHANNELS, dtype=np.float64)
     pixel_count = 0
@@ -53,7 +54,6 @@ def compute_normalization(img_dir, file_ids):
         b6    = raw_image[:, :, 5].astype(np.float32)
         b7    = raw_image[:, :, 6].astype(np.float32)
         nir   = raw_image[:, :, 7].astype(np.float32)
-        b8a   = raw_image[:, :, 8].astype(np.float32)
         swir1 = raw_image[:, :, 10].astype(np.float32)
         swir2 = raw_image[:, :, 11].astype(np.float32)
         slope = raw_image[:, :, 12].astype(np.float32)
@@ -65,54 +65,54 @@ def compute_normalization(img_dir, file_ids):
         bsi = ((swir1 + red) - (nir + blue)) / ((swir1 + red) + (nir + blue) + eps)
         ndwi = (green - nir) / (green + nir + eps)
         
-        image_18ch = np.stack(
-            [dem, slope, northness, eastness, curvature, blue, green, red, nir, b5, b6, b7, b8a, swir1, swir2, ndvi, bsi, ndwi], axis=-1
-        )  # final 18 channel raster
+        image_17ch = np.stack(
+            [dem, slope, northness, eastness, curvature, blue, green, red, nir, b5, b6, b7, swir1, swir2, ndvi, bsi, ndwi], axis=-1
+        )  # final 17 channel raster
         
-        image_18ch = np.nan_to_num(image_18ch, nan=0.0)  # Replace NaN values with 0.0
+        image_17ch = np.nan_to_num(image_17ch, nan=0.0)  # Replace NaN values with 0.0
         
-        h, w, _ = image_18ch.shape
+        h, w, _ = image_17ch.shape
         
-        channel_sum += np.sum(image_18ch, axis=(0, 1))
-        channel_squared_sum += np.sum(image_18ch ** 2, axis=(0, 1))
+        channel_sum += np.sum(image_17ch, axis=(0, 1))
+        channel_squared_sum += np.sum(image_17ch ** 2, axis=(0, 1))
         pixel_count += h * w
 
-    mean = channel_sum / pixel_count
-    std = np.sqrt((channel_squared_sum / pixel_count) - (mean ** 2))
+    means = channel_sum / pixel_count
+    stds = np.sqrt((channel_squared_sum / pixel_count) - (means ** 2))
     
 
-    return mean.astype(np.float32), std.astype(np.float32)
+    return means.astype(np.float32), stds.astype(np.float32)
 
-def train_transform():
+def train_transform(means, stds):
     return A.Compose([
         A.HorizontalFlip(p=0.5),
         A.VerticalFlip(p=0.5),
-            
         A.RandomRotate90(p=0.5),
             
         A.ShiftScaleRotate(
-            shift_limit=0.1,
-            scale_limit=0.1,
-            rotate_limit=45,
-            border_mode=0,
+            shift_limit=0.05,
+            scale_limit=(-0.1, 0.1),
+            rotate_limit=10,
+            border_mode=cv2.BORDER_REFLECT,
             p=0.5
         ),
+        
+        A.Normalize(mean=list(means), std=list(stds), max_pixel_value=1.0),
             
         ToTensorV2()
     ])
     
-def val_transform():
+def val_transform(means, stds):
     return A.Compose([
+        A.Normalize(mean=list(means), std=list(stds), max_pixel_value=1.0),
         ToTensorV2()
     ])
 
 class LandslideDataset(Dataset):
-    def __init__(self, img_dir, mask_dir=None, transform=None, file_ids=None, mean=None, std=None):
+    def __init__(self, img_dir, mask_dir=None, transform=None, file_ids=None):
         self.img_dir = img_dir
         self.mask_dir = mask_dir
         self.transform = transform
-        self.mean = mean
-        self.std = std
 
         if file_ids is not None:
             self.file_ids = file_ids
@@ -151,7 +151,6 @@ class LandslideDataset(Dataset):
         b6 = raw_image[:, :, 5]
         b7 = raw_image[:, :, 6]
         nir = raw_image[:, :, 7]
-        b8a = raw_image[:, :, 8]
         swir1 = raw_image[:, :, 10]
         swir2 = raw_image[:, :, 11]
         
@@ -167,22 +166,22 @@ class LandslideDataset(Dataset):
 
         ndwi = (green - nir) / (green + nir + eps)
 
-        image_18ch = np.stack(
-            [dem, slope, northness, eastness, curvature, blue, green, red, nir, b5, b6, b7, b8a, swir1, swir2, ndvi, bsi, ndwi], axis=-1
-        ).astype(np.float32)  # final 18 channel raster
+        image_17ch = np.stack(
+            [dem, slope, northness, eastness, curvature, blue, green, red, nir, b5, b6, b7, swir1, swir2, ndvi, bsi, ndwi], axis=-1
+        ).astype(np.float32)  # final 17 channel raster
         
-        if self.mean is not None and self.std is not None:
-            image_18ch = (image_18ch - self.mean) / (self.std + 1e-6)
+        image_17ch = np.nan_to_num(image_17ch, nan=0.0, posinf=0.0, neginf=0.0) 
 
+        # this will do the normalization, rotation and convert to tensor
         if self.transform:
             
-            augmented = self.transform(image=image_18ch, mask=mask)
+            augmented = self.transform(image=image_17ch, mask=mask)
             image = augmented['image'].float()
             mask = augmented['mask'].long()
         else:
-            image_18ch = image_18ch.transpose((2, 0, 1))  # (C, H, W)
+            image_17ch = image_17ch.transpose((2, 0, 1))  # (C, H, W)
 
-            image = torch.from_numpy(image_18ch).float()
+            image = torch.from_numpy(image_17ch).float()
             mask = torch.from_numpy(mask).long()
             
 
