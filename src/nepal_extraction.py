@@ -22,6 +22,11 @@ ASM_SHP = (root/"Datasets"/"asian"/"DataFile1 - 12838ASMInventory.shp")
 LANGTANG_SHP = (root/"Datasets"/"lantang-valley"/"DataFile3_-_LangtangInventory.shp")
 ARNIKO_SHP = (root/"Datasets"/"Araniko"/"DataFile4_-_ArnikoInventory.shp")
 
+
+# The validation dataset 
+FARWEST_POLY_SHP = (root/"Datasets"/"LandslideInventory_FarWesternNepal"/"LandslideInventory_FarWesternNepal_Pol.shp")
+FARWEST_DATED_PTS_SHP = (root/"Datasets"/"LandslideInventory_FarWesternNepal"/"LandslideInventory_FarWesternNepal_Points_Dated1992_2018.shp")
+
 ASM_DATE_FIELD = "parsed_post_date"
 
 def parse_landslide_scene_date(scene_id):
@@ -36,14 +41,14 @@ TILE_PX         = 128
 TILE_RES_M      = 10
 TILE_SIZE_M     = TILE_PX * TILE_RES_M
 
-OUTPUT_IMG_DIR  = root/"output/img"
-OUTPUT_MASK_DIR = root/"output/masks"
+OUTPUT_IMG_DIR  = root/"Datasets"/"Validation/output/img"
+OUTPUT_MASK_DIR = root/"Datasets"/"Validation/output/masks"
 
 S2_BANDS = ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8', 'B8A', 'B9',  'B11', 'B12']
 # 0:B1 1:B2(blue) 2:B3(green) 3:B4(red) 4:B5 5:B6 6:B7 7:B8(nir) 8:B9 9:B10
 # 10:B11(swir1) 11:B12(swir2) 12:slope 13:dem
 
-# Step 1 - Load, standardize, and merge the three inventories
+# Step 1 - Load, standardize, and merge the three training inventories
 
 def load_inventories():
     arniko      = gpd.read_file(ARNIKO_SHP)
@@ -96,6 +101,51 @@ def load_inventories():
     if dropped:
               print(f"Dropped {dropped} invalid geometries")
     return combined
+
+
+
+def load_val_inventory():
+    
+    poly = gpd.read_file(FARWEST_POLY_SHP)
+    dated_pts = gpd.read_file(FARWEST_DATED_PTS_SHP)
+    dated_pts = dated_pts.to_crs(poly.crs)
+    
+    joined = gpd.sjoin(
+        poly[["geometry"]],
+        dated_pts[["Year", "geometry"]],
+        how="inner",
+        predicate="contains",
+    )
+    
+    joined = joined[~joined.index.duplicated(keep="first")]
+    joined["Year"] = pd.to_numeric(joined["Year"], errors="coerce")
+    joined = joined.dropna(subset=["Year"])
+ 
+    print(f"Far-Western Nepal: {len(poly)} total polygons, "
+          f"{len(dated_pts)} dated points, {len(joined)} spatially matched")
+ 
+    val_recent = joined[joined["Year"] >= 2016].copy()
+    print(f"Far-Western Nepal (Sentinel-2 era, >= 2016): {len(val_recent)} of {len(joined)}")
+ 
+    val_recent[ASM_DATE_FIELD] = pd.to_datetime(
+        val_recent["Year"].astype(int).astype(str) + "-11-01"
+    )
+    val_recent["source_inv"] = "farwest_val"
+    val_recent = val_recent[["geometry", "source_inv", ASM_DATE_FIELD]]
+    val_recent = gpd.GeoDataFrame(val_recent, geometry="geometry", crs=poly.crs)
+ 
+    before = len(val_recent)
+    val_recent = val_recent[val_recent.geometry.notna()]
+    val_recent = val_recent[~val_recent.geometry.is_empty]
+    val_recent = val_recent[val_recent.geometry.is_valid]
+    dropped = before - len(val_recent)
+    if dropped:
+        print(f"Dropped {dropped} invalid geometries")
+ 
+    print(f"Total validation candidates available for extraction: {len(val_recent)}")
+    return val_recent
+
+
 
 # step-2 Build a square tile geometry around each landslide
 # Here UTM Zone 45N (EPSG:32645) is the specific projected metric grid designed for Nepal and Northeast india# because it covers nepal on a flat grid measured in meters, calculating distances, bounding boxes, and padding around landlsides in Zone 45N is mathmatically exact
@@ -377,15 +427,18 @@ def extract_dataset(candidates, all_landslide_polys, target_count=2500, random_s
     print(f"Extraction complete: Successfully extracted {successful} / {len(tasks)} tiles.")
     
     
-if __name__ == "__main__":
-      ee.Initialize(project=GEE_PROJECT_ID)
-      
-      candidates = load_inventories()
-      
-      extract_dataset(candidates, all_landslide_polys=candidates, target_count=2650, random_state=42)
-
-
 # if __name__ == "__main__":
 #       ee.Initialize(project=GEE_PROJECT_ID)
+      
 #       candidates = load_inventories()
-#       print(candidates.crs)
+      
+#       extract_dataset(candidates, all_landslide_polys=candidates, target_count=2650, random_state=42)
+      
+# if __name__ == "__main__":
+#         ee.Initialize(project=GEE_PROJECT_ID)
+        
+#         val_candidates = load_val_inventory()
+#         extract_dataset(
+#                 val_candidates, all_landslide_polys=val_candidates,
+#                 target_count=1000, random_state=42,
+#         )
